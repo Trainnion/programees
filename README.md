@@ -1,2 +1,0 @@
-# programees
-project ni owen
