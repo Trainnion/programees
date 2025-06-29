@@ -6,7 +6,7 @@ body {
 }
 
 .header {
-    font-family: blonde;
+    font-family: 'Courier New', Courier, monospace;
     background: #23272f;
     color: #fff;
     padding: 1rem 0;
