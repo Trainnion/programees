@@ -2,6 +2,7 @@
 
 let members = [
     owen = {
+        id: "00001",
         name: "Owen S. Estrera \"Nataho\"",
         profile_picture: "./members/estrera.jpg",
         projects: [
@@ -13,6 +14,7 @@ let members = [
     },
 
     cornelius = {
+        id: "00002",
         name: "Cornelius Timosa II \"Coke addict\"",
         profile_picture: "./members/timosa.jpg",
         projects: [
@@ -24,6 +26,7 @@ let members = [
     },
 
     denise = {
+        id: "00003",
         name: "Adrianne Caballero  \"DEN\"",
         profile_picture: "./members/dennise.jpg",
         projects: [
@@ -35,29 +38,56 @@ let members = [
     }
 ]
 
+const show_projects = (member) => {
+    // alert(`Projects for ${member.name}: ${member.projects.map(p => p.name).join(", ")}`);
+    let content = document.getElementById("content");
+    content.innerHTML = "";
+};
 
-//creating member_cards
-let content = document.getElementById("content");
-for (let member of members) {
-    let memberDiv = document.createElement("div");
-    memberDiv.className = "member_container"
+const show_members = () => {
+    //creating member_cards
+    
+    for (let member of members) {
+        let memberDiv = document.createElement("div");
+        memberDiv.className = "member_container"
 
-    let profilePicture = document.createElement("img");
-    profilePicture.src = member.profile_picture;
-    profilePicture.alt = "Profile Picture";
-    memberDiv.appendChild(profilePicture);
+        let profilePicture = document.createElement("img");
+        profilePicture.src = member.profile_picture;
+        profilePicture.alt = "Profile Picture";
+        memberDiv.appendChild(profilePicture);
 
-    let name = document.createElement("h2");
-    name.textContent = member.name;
-    memberDiv.appendChild(name);
+        let name = document.createElement("h2");
+        name.textContent = member.name;
+        memberDiv.appendChild(name);
 
-    // let projectList = document.createElement("ul");
-    // for (let project of member.projects) {
-    //     let projectItem = document.createElement("li");
-    //     projectItem.textContent = `${project.name}: ${project.description}`;
-    //     projectList.appendChild(projectItem);
-    // }
-    // memberDiv.appendChild(projectList);
+        content.appendChild(memberDiv);
 
-    content.appendChild(memberDiv);
+
+        memberDiv.onclick = () => {
+            show_projects(member.id);
+        };
+    }
 }
+
+show_members();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
