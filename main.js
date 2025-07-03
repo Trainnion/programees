@@ -19,7 +19,9 @@ const show_projects = (member_ID) => {
 
 }
 
-const show_members = () => {
+export const show_members = () => {
+    let content = document.getElementById("content");
+    content.innerHTML = "";
     //creating member_cards
     for (let member of members) {
         let memberDiv = document.createElement("div");
@@ -42,6 +44,8 @@ const show_members = () => {
         };
     }
 }
+
+window.show_members = show_members;
 
 show_members();
 

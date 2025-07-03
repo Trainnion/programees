@@ -3,7 +3,7 @@ let members = [
         id: "00001",
         name: "Owen S. Estrera \"Nataho\"",
         message: "Hello, I'm Owen! I'm passionate about programming and love to collaborate on exciting projects.",
-        profile_picture: "./members/estrera.jpg",
+        profile_picture: "./members_pictures/estrera.jpg",
         projects: [
             {
                 name: "programees",
@@ -17,7 +17,7 @@ let members = [
         id: "00002",
         name: "Cornelius Timosa II \"Coke addict\"",
         message: "Hi, I'm Cornelius! I love coke.",
-        profile_picture: "./members/timosa.jpg",
+        profile_picture: "./members_pictures/timosa.jpg",
         projects: [
             {
                 name: "projectX",
@@ -30,7 +30,7 @@ let members = [
         id: "00003",
         name: "Adrianne Caballero  \"DEN\"",
         message: "Hi, I'm Adrianne! I'm a creative thinker and love to explore new ideas.",     
-        profile_picture: "./members/dennise.jpg",
+        profile_picture: "./members_pictures/dennise.jpg",
         projects: [
             {
                 name: "projectY",

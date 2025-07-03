@@ -1,0 +1,28 @@
+/* Header styles extracted from style.css */
+body {
+    margin: 0;
+    padding: 0;
+    background: #181a1b;
+    color: #e0e0e0;
+}
+
+.header {
+    font-family: 'Courier New';
+    background: #23272f;
+    color: #fff;
+    padding: 1rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    padding-left: 2rem;
+    font-size: 2rem; 
+}
+
+.header h1 {
+    margin: 0;
+    font-weight: normal;
+    transition: color 0.3s, text-shadow 0.3s;
+    cursor: pointer;
+}
+.header h1:hover {
+    color: #3498db;
+    text-shadow: 0 2px 8px rgba(52,152,219,0.3);
+}
