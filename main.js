@@ -16,6 +16,7 @@ const show_projects = (member_ID) => {
             information_about_member.appendChild(member_message);
         }
     }
+    
 
 }
 
