@@ -1,0 +1,23 @@
+/* Styles for the play button used in project information */
+.play_button {
+    background: #23272f;
+    border: none;
+    border-radius: 50%;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(52,152,219,0.10);
+    margin-top: 1rem;
+}
+.play_button:hover {
+    background: #3498db;
+    box-shadow: 0 4px 16px rgba(52,152,219,0.18);
+}
+.play_button img {
+    width: 28px;
+    height: 28px;
+    pointer-events: none;
+}

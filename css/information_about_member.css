@@ -27,11 +27,22 @@
     font-size: 1rem;
     display: inline-block;
     transition: background-color 0.3s, color 0.3s;
+    font-weight: bold;
+}
+.language li {
+   font-weight: normal;
 }
 
-.information_about_member li:hover{
+.language li:hover{
     background: #2c2f33;
+    border-radius: 5px;
     color: #ffffff;
     cursor: pointer;
+}
+
+.list_of_languages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 

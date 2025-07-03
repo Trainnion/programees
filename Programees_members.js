@@ -6,9 +6,23 @@ let members = [
         profile_picture: "./members_pictures/estrera.jpg",
         projects: [
             {
+                language: "Python",
+                name: "Discrete Mathematics",
+                description: "A comprehensive Python project that explores fundamental concepts in discrete mathematics, including logic, set theory, combinatorics, graph theory, and algorithms. The project features interactive examples and problem-solving tools to help users understand and apply discrete math principles.",
+                Filedirectory: "../members_projects/Owen/DISCRETE_MATH-main",
+            },
+
+            {
                 language: "Godot",
                 name: "Blocky Blast",
-                description: "A godot project.",
+                description: "A JavaScript project.",
+                Filedirectory: "../members_projects/Owen/",
+            },
+              {
+                language: "Java",
+                name: "Pokemon Battle Simulator",
+                description: "A Java project.",
+                Filedirectory: "../members_projects/Owen/",
             },
 
         ]
