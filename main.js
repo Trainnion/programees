@@ -1,16 +1,26 @@
-
-
 import members from "./members.js";
 
+
 const show_projects = (member_ID) => {
-    // alert(`Projects for ${member.name}: ${member.projects.map(p => p.name).join(", ")}`);
+    
     let content = document.getElementById("content");
     content.innerHTML = "";
-};
+    let information_about_member= document.createElement("div");
+    information_about_member.className = "information_about_member";
+    content.appendChild(information_about_member);
+    let member_message = document.createElement("p");
+
+    for (let member of members) {
+        if (member.id === member_ID) {
+            member_message.textContent = member.message;
+            information_about_member.appendChild(member_message);
+        }
+    }
+
+}
 
 const show_members = () => {
     //creating member_cards
-    
     for (let member of members) {
         let memberDiv = document.createElement("div");
         memberDiv.className = "member_container"
