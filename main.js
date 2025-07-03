@@ -1,7 +1,16 @@
 import members from "./members.js";
 
+const languages = [
+    "JavaScript",
+    "Python",  
+    "C++",
+    "Java",
+    "C#",
+    "Godot",
+]
 
-const show_projects = (member_ID) => {
+
+const show_member_information = (member_ID) => {
     
     let content = document.getElementById("content");
     content.innerHTML = "";
@@ -16,8 +25,23 @@ const show_projects = (member_ID) => {
             information_about_member.appendChild(member_message);
         }
     }
-    
+    let list_of_languages = document.createElement("div");
+    list_of_languages.className = "list_of_languages";
+    information_about_member.appendChild(list_of_languages);
 
+
+    for ( let language of languages) {
+        for (let member of members) {
+            for (let project of member.projects) {
+                if (project.language === language) {
+                    let languageElement = document.createElement("ul");
+                    languageElement.className = "language";
+                    languageElement.textContent = language;
+                    list_of_languages.appendChild(languageElement);
+                }
+            }
+        }
+    }
 }
 
 export const show_members = () => {
@@ -41,7 +65,7 @@ export const show_members = () => {
 
 
         memberDiv.onclick = () => {
-            show_projects(member.id);
+            show_member_information(member.id);
         };
     }
 }

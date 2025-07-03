@@ -6,11 +6,11 @@ let members = [
         profile_picture: "./members_pictures/estrera.jpg",
         projects: [
             {
-                name: "programees",
-                description: "A platform for programmers to collaborate and share knowledge.",
+                language: "Godot",
+                name: "Blocky Blast",
+                description: "A godot project.",
             },
-
-
+            
         ]
     },
     {

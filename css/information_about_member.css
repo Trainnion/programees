@@ -1,21 +1,37 @@
 .information_about_member {
     background: #181a1b;
-    border-radius: 16px;
+    border-radius: 10px;
     box-shadow: 0 4px 24px rgba(52, 152, 219, 0.10);
     padding: 32px 24px;
-    margin: 32px auto;
-    max-width: 500px;
+    margin: 32px;
+    width: 100%;
     transition: box-shadow 0.3s;
-    text-align: center;
+    text-align: left;
     border: 1px solid #23272f;
 }
-.information_about_member:hover {
-    box-shadow: 0 8px 32px rgba(52, 152, 219, 0.22);
-}
+
 .information_about_member p {
     font-size: 1.2rem;
     color: #e0e0e0;
     margin: 0;
     line-height: 1.6;
     letter-spacing: 0.01em;
+    text-align: left;
 }
+.language {
+    background: #23272f;
+    color: #e0e0e0;
+    padding: 8px 16px;
+    border-radius: 6px;
+    margin: 8px 0;
+    font-size: 1rem;
+    display: inline-block;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.information_about_member ul:hover{
+    background: #2c2f33;
+    color: #ffffff;
+    cursor: pointer;
+}
+
