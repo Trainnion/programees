@@ -20,7 +20,7 @@ let members = [
         profile_picture: "./members_pictures/timosa.jpg",
         projects: [
             {
-                language: "",
+                language: "JavaScript",
                 name: "projectX",
                 description: "A groundbreaking project that changes everything.",
             }
