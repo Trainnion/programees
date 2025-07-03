@@ -1,4 +1,5 @@
 import members from "./Programees_members.js";
+import python_runner from "./python_runner.js";
 
 const languages = [
     "JavaScript",
@@ -34,9 +35,9 @@ const show_project_information = (viewed_project) => {
         playIcon.src = "./assets/buttons/play_arrow.svg";
         playIcon.alt = "Play";
         playButton.appendChild(playIcon);
-        // playButton.onclick = () => {
-        //     window.open(viewed_project.Filedirectory, '_blank');
-        // };
+        playButton.onclick = () => {
+            python_runner();
+        };
         project_information.appendChild(playButton);
     }
     // You can add more details about the project here
