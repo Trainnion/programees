@@ -1,4 +1,4 @@
-import members from "./members.js";
+import members from "./Programees_members.js";
 
 const languages = [
     "JavaScript",

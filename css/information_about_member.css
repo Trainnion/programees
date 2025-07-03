@@ -29,7 +29,7 @@
     transition: background-color 0.3s, color 0.3s;
 }
 
-.information_about_member ul:hover{
+.information_about_member li:hover{
     background: #2c2f33;
     color: #ffffff;
     cursor: pointer;
