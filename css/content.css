@@ -1,0 +1,7 @@
+.content {
+    margin: 2rem auto;
+    background: #23272f;
+    padding: 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
