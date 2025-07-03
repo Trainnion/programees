@@ -30,16 +30,19 @@ const show_member_information = (member_ID) => {
     information_about_member.appendChild(list_of_languages);
 
 
-    for ( let language of languages) {
-        for (let member of members) {
-            for (let project of member.projects) {
-                if (project.language === language) {
-                    let languageElement = document.createElement("ul");
-                    languageElement.className = "language";
-                    languageElement.textContent = language;
-                    list_of_languages.appendChild(languageElement);
-                }
+    for(let member of members) {
+        if (member.id === member_ID) {
+            for (let language of languages) {
+                for(let project of member.projects) {
+                    if (project.language === language) {
+                        let languageElement = document.createElement("li");
+                        languageElement.className = "language";
+                        languageElement.textContent = language;
+                        list_of_languages.appendChild(languageElement);
+                    }
+                 }
             }
+        break;
         }
     }
 }

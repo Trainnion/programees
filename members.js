@@ -13,6 +13,7 @@ let members = [
 
         ]
     },
+    
     {
         id: "00002",
         name: "Cornelius Timosa II \"Coke addict\"",
