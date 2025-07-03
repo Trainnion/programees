@@ -1,0 +1,212 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Kruskal's Algorithm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: 'Verdana', sans-serif;
+        background: linear-gradient(to right, #fffaf0, #f0f8ff);
+        color: #333;
+        margin: 0;
+        padding: 40px;
+      }
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 2rem;
+      }
+      .controls {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      button {
+        margin: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        border: none;
+        background-color: #1565c0;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0d47a1;
+      }
+      canvas {
+        border: 1px solid #ccc;
+        display: block;
+        margin: auto;
+        background: #fff;
+        border-radius: 10px;
+      }
+      .summary {
+        margin-top: 2rem;
+        background: #ffffffcc;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .summary h3 {
+        color: #1a237e;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Kruskal's Algorithm</h1>
+    <div class="controls">
+      <button onclick="addNode()">Add Node</button>
+      <button onclick="randomizeGraph()">Randomize</button>
+      <button onclick="runKruskal()">Run Kruskal</button>
+    </div>
+    <canvas id="graphCanvas" width="900" height="600"></canvas>
+    <div class="summary" id="summary"></div>
+    <script>
+      const canvas = document.getElementById('graphCanvas');
+      const ctx = canvas.getContext('2d');
+      const nodes = [];
+      const edges = [];
+      let selectedNode = null;
+      const radius = 20;
+      const edgeColors = new Map();
+
+      let draggingNode = null;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (const edge of edges) {
+          const { from, to, weight } = edge;
+          const color = edgeColors.get(edge) || '#888';
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(from.x, from.y);
+          ctx.lineTo(to.x, to.y);
+          ctx.stroke();
+
+          const midX = (from.x + to.x) / 2;
+          const midY = (from.y + to.y) / 2;
+          ctx.fillStyle = '#333';
+          ctx.fillRect(midX - 15, midY - 10, 30, 20);
+          ctx.fillStyle = 'white';
+          ctx.fillText(weight, midX - 5, midY + 5);
+        }
+
+        for (const node of nodes) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = '#1565c0';
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.stroke();
+          ctx.fillStyle = 'white';
+          ctx.fillText(node.label, node.x - 5, node.y + 4);
+        }
+      }
+
+      function addNode() {
+        const label = `N${nodes.length + 1}`;
+        const x = Math.random() * (canvas.width - 100) + 50;
+        const y = Math.random() * (canvas.height - 100) + 50;
+        nodes.push({ label, x, y });
+        draw();
+      }
+
+      canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const clickedNode = nodes.find(n => Math.hypot(n.x - x, n.y - y) < radius);
+
+        if (clickedNode) {
+          if (!selectedNode) {
+            selectedNode = clickedNode;
+          } else if (selectedNode !== clickedNode) {
+            const weight = parseInt(prompt('Enter weight:'), 10);
+            if (!isNaN(weight)) {
+              edges.push({ from: selectedNode, to: clickedNode, weight });
+              draw();
+            }
+            selectedNode = null;
+          }
+
+          // Start dragging
+          draggingNode = clickedNode;
+          offsetX = x - clickedNode.x;
+          offsetY = y - clickedNode.y;
+        }
+      });
+
+      canvas.addEventListener('mousemove', (e) => {
+        if (draggingNode) {
+          const rect = canvas.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          draggingNode.x = x - offsetX;
+          draggingNode.y = y - offsetY;
+          draw();
+        }
+      });
+
+      canvas.addEventListener('mouseup', () => {
+        draggingNode = null;
+      });
+
+      function randomizeGraph() {
+        nodes.length = 0;
+        edges.length = 0;
+        edgeColors.clear();
+        for (let i = 0; i < 6; i++) addNode();
+        for (let i = 0; i < 7; i++) {
+          const a = nodes[Math.floor(Math.random() * nodes.length)];
+          const b = nodes[Math.floor(Math.random() * nodes.length)];
+          if (a !== b && !edges.find(e => (e.from === a && e.to === b) || (e.from === b && e.to === a))) {
+            edges.push({ from: a, to: b, weight: Math.floor(Math.random() * 50) + 1 });
+          }
+        }
+        draw();
+      }
+
+      async function runKruskal() {
+        const subsets = new Map();
+        for (const node of nodes) subsets.set(node, node);
+
+        function find(node) {
+          if (subsets.get(node) !== node)
+            subsets.set(node, find(subsets.get(node)));
+          return subsets.get(node);
+        }
+
+        function union(a, b) {
+          subsets.set(find(a), find(b));
+        }
+
+        const sorted = [...edges].sort((a, b) => a.weight - b.weight);
+        const result = [];
+        let summary = '<h3>MST Edges:</h3><ul>';
+        for (const edge of sorted) {
+          const { from, to, weight } = edge;
+          if (find(from) !== find(to)) {
+            union(from, to);
+            result.push(edge);
+            edgeColors.set(edge, 'green');
+            draw();
+            await new Promise(r => setTimeout(r, 500));
+            summary += `<li>${from.label} - ${to.label} (Weight: ${weight})</li>`;
+          }
+        }
+        summary += `</ul><p><strong>Total Weight: ${result.reduce((s, e) => s + e.weight, 0)}</strong></p>`;
+        document.getElementById('summary').innerHTML = summary;
+        draw();
+      }
+    </script>
+  </body>
+  </html>

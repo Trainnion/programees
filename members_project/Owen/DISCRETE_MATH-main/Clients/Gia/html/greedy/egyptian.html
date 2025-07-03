@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Egyptian Fraction Solver</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(to right, #2e003e, #12002b);
+      color: #f0e0ff;
+      padding: 40px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(255, 102, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #ff66ff;
+      margin-bottom: 2rem;
+      text-shadow: 0 0 10px #ff66ffaa;
+    }
+
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    input[type="number"] {
+      flex: 1 1 150px;
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: 1px solid #ff66ff;
+      border-radius: 8px;
+      background: #1c002c;
+      color: #ffe6ff;
+      box-shadow: 0 0 10px #ff66ff33;
+    }
+
+    button {
+      font-size: 1rem;
+      padding: 0.7rem 1.5rem;
+      background-color: #ff66ff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 0 12px #ff66ff88, 0 0 20px #ff66ff44;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #e040e0;
+      box-shadow: 0 0 20px #ff66ffaa, 0 0 30px #ff66ff88;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(255, 102, 255, 0.15);
+    }
+
+    th, td {
+      padding: 0.9rem;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #ffe6ff;
+    }
+
+    th {
+      background-color: rgba(255, 102, 255, 0.1);
+      color: #ff66ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Egyptian Fraction Solver</h1>
+
+    <div class="input-group">
+      <input type="number" id="numerator" placeholder="Numerator (e.g., 2)" min="1" />
+      <input type="number" id="denominator" placeholder="Denominator (e.g., 7)" min="1" />
+      <button onclick="solveEgyptianFraction()">Solve</button>
+    </div>
+
+    <table id="result-table" style="display:none;">
+      <thead>
+        <tr>
+          <th>Step</th>
+          <th>Unit Fraction</th>
+          <th>Remaining Fraction</th>
+        </tr>
+      </thead>
+      <tbody id="result-body"></tbody>
+    </table>
+  </div>
+
+  <script>
+    function solveEgyptianFraction() {
+      const num = parseInt(document.getElementById('numerator').value);
+      const den = parseInt(document.getElementById('denominator').value);
+      const tbody = document.getElementById('result-body');
+      const table = document.getElementById('result-table');
+
+      if (!num || !den || num <= 0 || den <= 0 || num >= den) {
+        alert("Please enter valid values such that 0 < numerator < denominator.");
+        return;
+      }
+
+      let a = num, b = den, step = 1;
+      tbody.innerHTML = '';
+      table.style.display = 'table';
+
+      while (a !== 0) {
+        const x = Math.ceil(b / a);
+        const unit = `1/${x}`;
+        const remainingNum = a * x - b;
+        const remainingDen = b * x;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${step++}</td>
+          <td>${unit}</td>
+          <td>${remainingNum}/${remainingDen}</td>
+        `;
+        tbody.appendChild(tr);
+
+        a = remainingNum;
+        b = remainingDen;
+      }
+    }
+  </script>
+</body>
+</html>

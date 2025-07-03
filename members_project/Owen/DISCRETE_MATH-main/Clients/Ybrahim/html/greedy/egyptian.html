@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🏅 Egyptian Fraction Arena</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #e3f2fd, #bbdefb);
+      color: #0d47a1;
+      padding: 2rem;
+      max-width: 850px;
+      margin: auto;
+      position: relative;
+    }
+
+    .profile-picture {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      border: 4px solid #42a5f5;
+      border-radius: 50%;
+      background: #fff;
+      padding: 3px;
+      width: 100px;
+      height: 100px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    .profile-picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    h1 {
+      color: #1565c0;
+      text-align: center;
+      text-shadow: 1px 1px #bbdefb;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+    }
+
+    input[type="number"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 150px;
+      border: 1px solid #90caf9;
+      border-radius: 6px;
+      background-color: #e3f2fd;
+      color: #0d47a1;
+    }
+
+    button {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      background: #42a5f5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #1e88e5;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      background: #ffffff;
+      border: 1px solid #90caf9;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #e3f2fd;
+    }
+
+    th {
+      background-color: #e3f2fd;
+      color: #0d47a1;
+    }
+
+    @media (max-width: 600px) {
+      .profile-picture {
+        width: 80px;
+        height: 80px;
+        top: 10px;
+        right: 10px;
+      }
+
+      input[type="number"] {
+        width: 100%;
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sports Profile Picture -->
+  <div class="profile-picture">
+    <img src="https://scontent.fceb6-1.fna.fbcdn.net/v/t39.30808-1/500684316_1111722254322229_3570693525122643456_n.jpg?stp=dst-jpg_s100x100_tt6&_nc_cat=105&ccb=1-7&_nc_sid=e99d92&_nc_ohc=7V9lAMu0zQ0Q7kNvwFnPSAO&_nc_oc=AdkR53xhjKwlXrGcp2eR9RApDGbcrb4aq3hSR4ZLJ60szFhp8khCnza9rPvGSCdZgfMtK_N0y6hRAZBcTGXEyxds&_nc_zt=24&_nc_ht=scontent.fceb6-1.fna&_nc_gid=TxrEvXcPEfNSpKTdNExc3g&oh=00_AfM2O5OdpvYAzQ7vnhPJ4Lx5iII2xrRy2hwVVda7kDe_6g&oe=685AA0BB" alt="Profile">
+  </div>
+
+  <h1>🏟️ Egyptian Fraction Arena</h1>
+
+  <div class="input-group">
+    <input type="number" id="numerator" placeholder="Numerator (e.g. 2)" min="1"/>
+    <input type="number" id="denominator" placeholder="Denominator (e.g. 7)" min="1"/>
+    <button onclick="solveEgyptianFraction()">🏁 Solve</button>
+  </div>
+
+  <table id="result-table" style="display:none;">
+    <thead>
+      <tr>
+        <th>🏅 Step</th>
+        <th>⚖️ Unit Fraction</th>
+        <th>⏱️ Remaining</th>
+      </tr>
+    </thead>
+    <tbody id="result-body"></tbody>
+  </table>
+
+  <script>
+    function solveEgyptianFraction() {
+      const num = parseInt(document.getElementById('numerator').value);
+      const den = parseInt(document.getElementById('denominator').value);
+      const tbody = document.getElementById('result-body');
+      const table = document.getElementById('result-table');
+
+      if (!num || !den || num <= 0 || den <= 0 || num >= den) {
+        alert("🏀 Please enter valid values such that 0 < numerator < denominator.");
+        return;
+      }
+
+      let a = num, b = den, step = 1;
+      tbody.innerHTML = '';
+      table.style.display = 'table';
+
+      while (a !== 0) {
+        const x = Math.ceil(b / a);
+        const unit = `1/${x}`;
+        const remainingNum = a * x - b;
+        const remainingDen = b * x;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${step++}</td>
+          <td>${unit}</td>
+          <td>${remainingNum}/${remainingDen}</td>
+        `;
+        tbody.appendChild(tr);
+
+        a = remainingNum;
+        b = remainingDen;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dijkstra's Algorithm Visualizer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    .container {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 51, 102, 0.2);
+      max-width: 900px;
+      width: 100%;
+    }
+    canvas {
+      border: 2px solid #3399ff;
+      border-radius: 8px;
+      margin-top: 1rem;
+      cursor: grab;
+    }
+    button, select {
+      padding: 0.75rem 1.25rem;
+      margin: 0.5rem;
+      background: #3399ff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0066cc;
+    }
+    #summary {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Dijkstra's Algorithm Visualizer</h1>
+    <label for="startNode">Start Node: </label>
+    <select id="startNode"></select>
+    <button onclick="runDijkstra()">Run Dijkstra</button>
+    <button onclick="resetGraph()">Reset</button>
+    <button onclick="generateRandomGraph()">Random</button>
+    <button onclick="location.href='index.html'">Return to Index</button>
+    <canvas id="graph" width="800" height="500"></canvas>
+    <div id="summary"></div>
+  </div>
+  <script>
+    const canvas = document.getElementById('graph');
+    const ctx = canvas.getContext('2d');
+    let nodes = [];
+    let edges = [];
+    let draggingNode = null;
+
+    canvas.addEventListener('mousedown', e => {
+      const { offsetX: x, offsetY: y } = e;
+      draggingNode = nodes.find(n => Math.hypot(n.x - x, n.y - y) < 20) || null;
+    });
+
+    canvas.addEventListener('mousemove', e => {
+      if (draggingNode) {
+        draggingNode.x = e.offsetX;
+        draggingNode.y = e.offsetY;
+        draw();
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => draggingNode = null);
+
+    canvas.addEventListener('click', e => {
+      const { offsetX: x, offsetY: y } = e;
+      const clicked = nodes.find(n => Math.hypot(n.x - x, n.y - y) < 20);
+      if (clicked) {
+        if (window.selectedNode && window.selectedNode !== clicked) {
+          const weight = prompt("Enter edge weight:");
+          if (!isNaN(weight) && weight !== null && weight !== '') {
+            edges.push({ from: window.selectedNode, to: clicked, weight: parseFloat(weight), highlight: false });
+            window.selectedNode = null;
+            draw();
+          }
+        } else {
+          window.selectedNode = clicked;
+        }
+      } else {
+        const newNode = { id: nodes.length, x, y };
+        nodes.push(newNode);
+        updateStartSelect();
+        draw();
+      }
+    });
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const edge of edges) {
+        ctx.beginPath();
+        ctx.moveTo(edge.from.x, edge.from.y);
+        ctx.lineTo(edge.to.x, edge.to.y);
+        ctx.strokeStyle = edge.highlight ? 'green' : 'gray';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        const midX = (edge.from.x + edge.to.x) / 2;
+        const midY = (edge.from.y + edge.to.y) / 2;
+        ctx.fillStyle = 'black';
+        ctx.fillText(edge.weight, midX, midY);
+      }
+      for (const node of nodes) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 20, 0, Math.PI * 2);
+        ctx.fillStyle = '#3399ff';
+        ctx.fill();
+        ctx.strokeStyle = '#003366';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = 'white';
+        ctx.fillText(node.id, node.x - 5, node.y + 5);
+      }
+    }
+
+    function updateStartSelect() {
+      const select = document.getElementById('startNode');
+      select.innerHTML = nodes.map(n => `<option value="${n.id}">${n.id}</option>`).join('');
+    }
+
+    async function runDijkstra() {
+    const src = 0;
+    let dist = Array(nodes.length).fill(Infinity);
+    let visited = Array(nodes.length).fill(false);
+    let prev = Array(nodes.length).fill(null);
+    dist[src] = 0;
+
+    let summary = document.getElementById('summary');
+    summary.innerHTML = `<p>Running Dijkstra's from Node ${src}</p>`;
+
+    for (let i = 0; i < nodes.length; i++) {
+        let u = -1;
+        for (let j = 0; j < nodes.length; j++) {
+        if (!visited[j] && (u === -1 || dist[j] < dist[u])) u = j;
+        }
+
+        if (dist[u] === Infinity) break;
+        visited[u] = true;
+
+        for (const edge of edges) {
+        let v = null;
+        if (edge.from.id === u) v = edge.to.id;
+        else if (edge.to.id === u) v = edge.from.id;
+        else continue;
+
+        if (dist[v] > dist[u] + edge.weight) {
+            dist[v] = dist[u] + edge.weight;
+            prev[v] = u;
+        }
+        }
+
+        draw();
+        await new Promise(r => setTimeout(r, 400));
+    }
+
+    // Clear all highlights
+    for (const edge of edges) edge.highlight = false;
+
+    // Highlight shortest paths
+    for (let target = 0; target < nodes.length; target++) {
+        if (target === src || dist[target] === Infinity) continue;
+        let path = [];
+        for (let at = target; at !== null; at = prev[at]) path.push(at);
+        path.reverse();
+
+        for (let i = 0; i < path.length - 1; i++) {
+        const a = path[i];
+        const b = path[i + 1];
+        const edge = edges.find(e =>
+            (e.from.id === a && e.to.id === b) ||
+            (e.from.id === b && e.to.id === a)
+        );
+        if (edge) edge.highlight = true;
+        }
+    }
+
+    draw();
+
+    // Show paths
+    for (let target = 0; target < nodes.length; target++) {
+        if (target === src) continue;
+        if (dist[target] === Infinity) {
+        summary.innerHTML += `<p>No path to node ${target}</p>`;
+        continue;
+        }
+
+        let path = [];
+        for (let at = target; at !== null; at = prev[at]) path.push(at);
+        path.reverse();
+
+        let pathStr = path.join(" → ");
+        summary.innerHTML += `<p>Path to node ${target}: <strong>${pathStr}</strong> (Cost: <strong>${dist[target]}</strong>)</p>`;
+        }
+    }
+
+
+    function resetGraph() {
+      nodes = [];
+      edges = [];
+      window.selectedNode = null;
+      document.getElementById('summary').innerHTML = '';
+      updateStartSelect();
+      draw();
+    }
+
+    function generateRandomGraph() {
+      resetGraph();
+      const count = 6;
+      for (let i = 0; i < count; i++) {
+        nodes.push({ id: i, x: Math.random() * 700 + 50, y: Math.random() * 400 + 50 });
+      }
+      for (let i = 0; i < count; i++) {
+        for (let j = i + 1; j < count; j++) {
+          if (Math.random() < 0.4) {
+            const weight = Math.floor(Math.random() * 20) + 1;
+            edges.push({ from: nodes[i], to: nodes[j], weight });
+          }
+        }
+      }
+      updateStartSelect();
+      draw();
+    }
+
+    draw();
+  </script>
+</body>
+</html>

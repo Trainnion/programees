@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Borůvka's Algorithm Visualizer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 51, 102, 0.2);
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      color: #002244;
+    }
+    canvas {
+      border: 2px solid #3399ff;
+      border-radius: 8px;
+      margin-top: 1rem;
+      cursor: grab;
+    }
+    button {
+      padding: 0.75rem 1.25rem;
+      background: #3399ff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 1rem;
+    }
+    button:hover {
+      background: #0066cc;
+    }
+    #summary {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 2rem;
+      width: 100%;
+      font-size: 14px;
+      color: #002244;
+    }
+    .step-visualization {
+      margin-top: 1rem;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .step-box {
+      border: 2px solid #3399ff;
+      border-radius: 10px;
+      padding: 0.75rem;
+      min-width: 200px;
+      background-color: #eef7ff;
+    }
+    .step-box p {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Borůvka's Algorithm Visualizer</h1>
+    <canvas id="graph" width="800" height="500"></canvas>
+    <button onclick="runBoruvka()">Run Borůvka's Algorithm</button>
+    <button onclick="resetGraph()">Reset</button>
+    <button onclick="generateRandomGraph()">Random</button>
+    <button onclick="location.href='index.html'">Return to Index</button>
+    <div id="summary"></div>
+    <div class="step-visualization" id="steps"></div>
+  </div>
+  <script>
+    const canvas = document.getElementById('graph');
+    const ctx = canvas.getContext('2d');
+    let nodes = [];
+    let edges = [];
+    let draggingNode = null;
+
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+    canvas.addEventListener('mousedown', e => {
+      const { offsetX: x, offsetY: y } = e;
+      draggingNode = nodes.find(n => Math.hypot(n.x - x, n.y - y) < 20) || null;
+    });
+
+    canvas.addEventListener('mousemove', e => {
+      if (draggingNode) {
+        draggingNode.x = e.offsetX;
+        draggingNode.y = e.offsetY;
+        draw();
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => draggingNode = null);
+
+    canvas.addEventListener('click', e => {
+      const { offsetX: x, offsetY: y } = e;
+      const clicked = nodes.find(n => Math.hypot(n.x - x, n.y - y) < 20);
+      if (clicked) {
+        if (window.selectedNode && window.selectedNode !== clicked) {
+          const weight = prompt("Enter edge weight:");
+          if (!isNaN(weight) && weight !== null && weight !== '') {
+            edges.push({ from: window.selectedNode, to: clicked, weight: parseFloat(weight) });
+            window.selectedNode = null;
+            draw();
+          }
+        } else {
+          window.selectedNode = clicked;
+        }
+      } else {
+        nodes.push({ id: nodes.length, x, y });
+        draw();
+      }
+    });
+
+    function draw(components = []) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      components.forEach(comp => {
+        ctx.beginPath();
+        let xMin = Math.min(...comp.map(n => n.x));
+        let xMax = Math.max(...comp.map(n => n.x));
+        let yMin = Math.min(...comp.map(n => n.y));
+        let yMax = Math.max(...comp.map(n => n.y));
+        ctx.strokeStyle = 'orange';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(xMin - 30, yMin - 30, (xMax - xMin) + 60, (yMax - yMin) + 60);
+      });
+
+      for (const edge of edges) {
+        ctx.beginPath();
+        ctx.moveTo(edge.from.x, edge.from.y);
+        ctx.lineTo(edge.to.x, edge.to.y);
+        ctx.strokeStyle = edge.highlight ? 'green' : '#ccc';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        const midX = (edge.from.x + edge.to.x) / 2;
+        const midY = (edge.from.y + edge.to.y) / 2;
+        ctx.fillStyle = 'blue';
+        ctx.font = '14px Segoe UI';
+        ctx.fillText(edge.weight, midX, midY);
+      }
+
+      for (const node of nodes) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 20, 0, Math.PI * 2);
+        ctx.fillStyle = '#3399ff';
+        ctx.fill();
+        ctx.strokeStyle = '#003366';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = 'white';
+        ctx.font = '14px Segoe UI';
+        ctx.fillText(node.id, node.x - 5, node.y + 5);
+      }
+    }
+
+    async function runBoruvka() {
+      let parent = Array(nodes.length).fill(0).map((_, i) => i);
+      function find(u) {
+        if (parent[u] !== u) parent[u] = find(parent[u]);
+        return parent[u];
+      }
+      function union(u, v) {
+        parent[find(u)] = find(v);
+      }
+
+      let mst = [];
+      let step = 1;
+      let summary = document.getElementById('summary');
+      let stepsDiv = document.getElementById('steps');
+      summary.innerHTML = '';
+      stepsDiv.innerHTML = '';
+
+      while (new Set(parent.map(find)).size > 1) {
+        let cheapest = {};
+        for (const edge of edges) {
+          const u = find(edge.from.id);
+          const v = find(edge.to.id);
+          if (u !== v) {
+            if (!cheapest[u] || edge.weight < cheapest[u].weight) cheapest[u] = edge;
+            if (!cheapest[v] || edge.weight < cheapest[v].weight) cheapest[v] = edge;
+          }
+        }
+
+        let used = new Set();
+        let comps = {};
+        for (const key in cheapest) {
+          const edge = cheapest[key];
+          const u = find(edge.from.id);
+          const v = find(edge.to.id);
+          if (u !== v && !used.has(edge)) {
+            union(u, v);
+            edge.highlight = true;
+            mst.push(edge);
+            used.add(edge);
+            summary.innerHTML += `<p><strong>Step ${step}:</strong> Connect node ${edge.from.id} to ${edge.to.id} (weight ${edge.weight})</p>`;
+            stepsDiv.innerHTML += `<div class='step-box'><p><strong>Step ${step}:</strong></p><p>Edge ${edge.from.id} → ${edge.to.id}</p><p>Weight: ${edge.weight}</p></div>`;
+            step++;
+          }
+        }
+
+        for (let node of nodes) {
+          const root = find(node.id);
+          if (!comps[root]) comps[root] = [];
+          comps[root].push(node);
+        }
+        draw(Object.values(comps));
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+
+    function resetGraph() {
+      nodes = [];
+      edges = [];
+      window.selectedNode = null;
+      document.getElementById('summary').innerHTML = '';
+      document.getElementById('steps').innerHTML = '';
+      draw();
+    }
+
+    function generateRandomGraph() {
+      resetGraph();
+      const nodeCount = 6 + Math.floor(Math.random() * 5);
+      for (let i = 0; i < nodeCount; i++) {
+        nodes.push({ id: i, x: Math.random() * 700 + 50, y: Math.random() * 400 + 50 });
+      }
+      for (let i = 0; i < nodeCount; i++) {
+        for (let j = i + 1; j < nodeCount; j++) {
+          if (Math.random() < 0.4) {
+            const weight = Math.floor(Math.random() * 20) + 1;
+            edges.push({ from: nodes[i], to: nodes[j], weight });
+          }
+        }
+      }
+      draw();
+    }
+
+    draw();
+  </script>
+</body>
+</html>

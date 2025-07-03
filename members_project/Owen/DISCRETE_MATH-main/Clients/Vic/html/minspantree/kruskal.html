@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🌌 Kruskal's Starbound</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: url('https://www.transparenttextures.com/patterns/stardust.png'), radial-gradient(ellipse at center, #000000 0%, #1a1a1a 100%);
+      color: #feda4a;
+      padding: 2rem;
+      max-width: 950px;
+      margin: auto;
+      position: relative;
+    }
+
+    .profile-picture {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      border: 4px solid #ffe81f;
+      border-radius: 50%;
+      padding: 3px;
+      background: #000;
+      box-shadow: 0 0 12px #ffe81f;
+      width: 90px;
+      height: 90px;
+      z-index: 10;
+    }
+
+    .profile-picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffe81f;
+      text-shadow: 0 0 10px #ffe81f;
+      margin-bottom: 2rem;
+      font-size: 2.6rem;
+    }
+
+    .controls {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    button {
+      margin: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      background-color: #00bcd4;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 0 10px #00e5ff;
+    }
+
+    button:hover {
+      background-color: #00acc1;
+      transform: scale(1.05);
+    }
+
+    canvas {
+      border: 3px solid #00bcd4;
+      display: block;
+      margin: 1.5rem auto;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 12px;
+      box-shadow: 0 0 15px #00e5ff;
+    }
+
+    .summary {
+      margin-top: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+      border: 1px solid #00bcd4;
+    }
+
+    .summary h3 {
+      color: #00e5ff;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 5px #00e5ff;
+    }
+
+    ul {
+      padding-left: 1.2rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    strong {
+      color: #ffe81f;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .profile-picture {
+        width: 70px;
+        height: 70px;
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-picture">
+    <img src="https://scontent.fceb2-1.fna.fbcdn.net/v/t39.30808-1/497561792_2193043201196226_3703741751922292503_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=108&ccb=1-7&_nc_sid=e99d92&_nc_ohc=BKUH6jtusa8Q7kNvwEI5AGJ&_nc_oc=Admgh0Y7bzGoQHBx2yDi0H-Z01jomM6vobXLgsQcZxfIUiOVOETnHlp8QxJ-0Vt7ZF-LE65AVJWL3wAP6hckfytP&_nc_zt=24&_nc_ht=scontent.fceb2-1.fna&_nc_gid=CQBLn2Qts3PUEmmrM8JwSg&oh=00_AfN2s8Cc9tHNz9Bb112RKody4hvdyl-sCoSxbTfE7rCeQA&oe=685D323B" alt="Profile" />
+  </div>
+
+  <h1>🛰 Kruskal's Starbound</h1>
+
+  <div class="controls">
+    <button onclick="addNode()">Deploy Node</button>
+    <button onclick="randomizeGraph()">Randomize Sector</button>
+    <button onclick="runKruskal()">Engage Kruskal Protocol</button>
+  </div>
+
+  <canvas id="graphCanvas" width="900" height="600"></canvas>
+  <div class="summary" id="summary"></div>
+
+  <script>
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const nodes = [];
+    const edges = [];
+    let selectedNode = null;
+    const radius = 20;
+    const edgeColors = new Map();
+
+    let draggingNode = null;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (const edge of edges) {
+        const { from, to, weight } = edge;
+        const color = edgeColors.get(edge) || '#888';
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.stroke();
+
+        const midX = (from.x + to.x) / 2;
+        const midY = (from.y + to.y) / 2;
+        ctx.fillStyle = '#3f51b5';
+        ctx.fillRect(midX - 15, midY - 10, 30, 20);
+        ctx.fillStyle = 'white';
+        ctx.fillText(weight, midX - 5, midY + 5);
+      }
+
+      for (const node of nodes) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#fbc02d';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = '#000';
+        ctx.fillText(node.label, node.x - 5, node.y + 4);
+      }
+    }
+
+    function addNode() {
+      const label = `N${nodes.length + 1}`;
+      const x = Math.random() * (canvas.width - 100) + 50;
+      const y = Math.random() * (canvas.height - 100) + 50;
+      nodes.push({ label, x, y });
+      draw();
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const clickedNode = nodes.find(n => Math.hypot(n.x - x, n.y - y) < radius);
+
+      if (clickedNode) {
+        if (!selectedNode) {
+          selectedNode = clickedNode;
+        } else if (selectedNode !== clickedNode) {
+          const weight = parseInt(prompt('Enter hyperspace distance:'), 10);
+          if (!isNaN(weight)) {
+            edges.push({ from: selectedNode, to: clickedNode, weight });
+            draw();
+          }
+          selectedNode = null;
+        }
+
+        draggingNode = clickedNode;
+        offsetX = x - clickedNode.x;
+        offsetY = y - clickedNode.y;
+      }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (draggingNode) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        draggingNode.x = x - offsetX;
+        draggingNode.y = y - offsetY;
+        draw();
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      draggingNode = null;
+    });
+
+    function randomizeGraph() {
+      nodes.length = 0;
+      edges.length = 0;
+      edgeColors.clear();
+      for (let i = 0; i < 6; i++) addNode();
+      for (let i = 0; i < 7; i++) {
+        const a = nodes[Math.floor(Math.random() * nodes.length)];
+        const b = nodes[Math.floor(Math.random() * nodes.length)];
+        if (a !== b && !edges.find(e => (e.from === a && e.to === b) || (e.from === b && e.to === a))) {
+          edges.push({ from: a, to: b, weight: Math.floor(Math.random() * 50) + 1 });
+        }
+      }
+      draw();
+    }
+
+    async function runKruskal() {
+      const subsets = new Map();
+      for (const node of nodes) subsets.set(node, node);
+
+      function find(node) {
+        if (subsets.get(node) !== node)
+          subsets.set(node, find(subsets.get(node)));
+        return subsets.get(node);
+      }
+
+      function union(a, b) {
+        subsets.set(find(a), find(b));
+      }
+
+      const sorted = [...edges].sort((a, b) => a.weight - b.weight);
+      const result = [];
+      let summary = '<h3>🚀 MST Path Log:</h3><ul>';
+      for (const edge of sorted) {
+        const { from, to, weight } = edge;
+        if (find(from) !== find(to)) {
+          union(from, to);
+          result.push(edge);
+          edgeColors.set(edge, 'lime');
+          draw();
+          await new Promise(r => setTimeout(r, 500));
+          summary += `<li>${from.label} ➡ ${to.label} (Distance: ${weight})</li>`;
+        }
+      }
+      summary += `</ul><p><strong>Total Distance: ${result.reduce((s, e) => s + e.weight, 0)}</strong></p>`;
+      document.getElementById('summary').innerHTML = summary;
+      draw();
+    }
+  </script>
+</body>
+</html>

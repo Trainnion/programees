@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fractional Knapsack - Beach Style</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap');
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(to bottom, #ffeaa7, #a2d5f2);
+      color: #2e3d49;
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+      color: #007777;
+      text-shadow: 1px 1px 3px rgba(255,255,255,0.4);
+    }
+
+    .controls {
+      margin: 1.5rem 0;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+
+    label {
+      font-size: 1.1rem;
+      color: #0a3d62;
+    }
+
+    input[type="number"] {
+      font-size: 1rem;
+      padding: 0.4rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background-color: #fffdf5;
+      box-shadow: inset 0 0 5px #ffddaa;
+    }
+
+    button {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      background-color: #ff9f80;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      background-color: #fd9644;
+      transform: translateY(-2px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      background-color: rgba(255, 255, 255, 0.85);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background: #a8edea;
+      color: #007777;
+    }
+
+    td input {
+      width: 100%;
+      padding: 0.4rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    #totalValue {
+      font-size: 1.3rem;
+      color: #e17055;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🏝️ Fractional Knapsack Problem</h1>
+
+  <div class="controls">
+    <label>Knapsack Capacity:
+      <input type="number" id="capacity" value="50" min="1">
+    </label>
+    <button onclick="addRow()">Add Item</button>
+    <button onclick="computeKnapsack()">Compute</button>
+  </div>
+
+  <table id="itemTable">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Value</th>
+        <th>Weight</th>
+        <th>Remove</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>🌊 Selected Items</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Value</th>
+        <th>Weight</th>
+        <th>Fraction Taken</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3 id="totalValue"></h3>
+
+  <script>
+    let itemId = 1;
+
+    function addRow(value = '', weight = '') {
+      const tbody = document.querySelector('#itemTable tbody');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>Item ${itemId}</td>
+        <td><input type="number" min="0" step="any" value="${value}"></td>
+        <td><input type="number" min="0.1" step="any" value="${weight}"></td>
+        <td><button onclick="this.parentElement.parentElement.remove()">Remove</button></td>
+      `;
+      tbody.appendChild(row);
+      itemId++;
+    }
+
+    function computeKnapsack() {
+      const capacity = parseFloat(document.getElementById('capacity').value);
+      const rows = document.querySelectorAll('#itemTable tbody tr');
+      const items = [];
+
+      rows.forEach((row, index) => {
+        const inputs = row.querySelectorAll('input');
+        const value = parseFloat(inputs[0].value);
+        const weight = parseFloat(inputs[1].value);
+        if (!isNaN(value) && !isNaN(weight) && weight > 0) {
+          items.push({
+            index: index + 1,
+            value,
+            weight,
+            ratio: value / weight
+          });
+        }
+      });
+
+      items.sort((a, b) => b.ratio - a.ratio);
+
+      let remaining = capacity;
+      let totalValue = 0;
+      const selected = [];
+
+      for (const item of items) {
+        if (remaining <= 0) break;
+        const takeWeight = Math.min(item.weight, remaining);
+        const fraction = takeWeight / item.weight;
+        totalValue += item.value * fraction;
+        remaining -= takeWeight;
+
+        selected.push({
+          index: item.index,
+          value: item.value,
+          weight: item.weight,
+          fraction: fraction.toFixed(2)
+        });
+      }
+
+      const resTbody = document.querySelector('#resultTable tbody');
+      resTbody.innerHTML = "";
+      selected.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>Item ${item.index}</td>
+          <td>${item.value}</td>
+          <td>${item.weight}</td>
+          <td>${item.fraction}</td>
+        `;
+        resTbody.appendChild(row);
+      });
+
+      document.getElementById('totalValue').textContent = `🌞 Total value obtained: ${totalValue.toFixed(2)}`;
+    }
+
+    // Initialize with 3 rows
+    addRow(60, 10);
+    addRow(100, 20);
+    addRow(120, 30);
+  </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prim's Algorithm Visualizer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 51, 102, 0.2);
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      color: #002244;
+    }
+    canvas {
+      border: 2px solid #3399ff;
+      border-radius: 8px;
+      margin-top: 1rem;
+      cursor: grab;
+    }
+    .controls {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1rem;
+    }
+    button {
+      padding: 0.75rem 1.25rem;
+      background: #3399ff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #0066cc;
+    }
+    .back-btn {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .back-btn a {
+      color: #3399ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .back-btn a:hover {
+      text-decoration: underline;
+    }
+    table {
+      width: 100%;
+      margin-top: 1.5rem;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 0.5rem 1rem;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background-color: #e6f2ff;
+    }
+    .wrong {
+      color: red;
+    }
+    .total {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #003366;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Prim's Algorithm Visualizer</h1>
+    <canvas id="graph" width="800" height="500"></canvas>
+    <div class="controls">
+      <button onclick="selectStartNode()">Select Start Node</button>
+      <button onclick="runPrim()">Run Prim's Algorithm</button>
+      <button onclick="resetGraph()">Reset</button>
+    </div>
+    <div id="summary"></div>
+    <div id="totalWeight" class="total"></div>
+    <div class="back-btn">
+      <a href="../index.html">← Back to Index</a>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('graph');
+    const ctx = canvas.getContext('2d');
+    let nodes = [];
+    let edges = [];
+    let mstEdges = [];
+    let wrongEdges = [];
+    let selectedNode = null;
+    let startNode = null;
+    let draggingNode = null;
+
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+    canvas.addEventListener('mousedown', e => {
+      const { offsetX: x, offsetY: y } = e;
+      if (e.button === 2) return;
+      draggingNode = nodes.find(n => Math.hypot(n.x - x, n.y - y) < 25) || null;
+    });
+
+    canvas.addEventListener('mousemove', e => {
+      if (draggingNode) {
+        draggingNode.x = e.offsetX;
+        draggingNode.y = e.offsetY;
+        draw();
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => draggingNode = null);
+
+    canvas.addEventListener('click', e => {
+      const { offsetX: x, offsetY: y } = e;
+      const clicked = nodes.find(n => Math.hypot(n.x - x, n.y - y) < 25);
+
+      if (clicked) {
+        if (!selectedNode) {
+          selectedNode = clicked;
+        } else if (selectedNode !== clicked) {
+          const weight = prompt("Enter edge weight:");
+          if (!isNaN(weight) && weight !== null && weight !== '') {
+            edges.push({ from: selectedNode, to: clicked, weight: parseFloat(weight) });
+            selectedNode = null;
+            draw();
+          }
+        }
+      } else {
+        nodes.push({ x, y, id: nodes.length });
+        draw();
+      }
+    });
+
+    canvas.addEventListener('contextmenu', e => {
+      const { offsetX: x, offsetY: y } = e;
+      const index = nodes.findIndex(n => Math.hypot(n.x - x, n.y - y) < 25);
+      if (index !== -1) {
+        const removed = nodes[index];
+        nodes.splice(index, 1);
+        edges = edges.filter(edge => edge.from !== removed && edge.to !== removed);
+        selectedNode = null;
+        draw();
+      }
+    });
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (const edge of edges) {
+        ctx.strokeStyle = mstEdges.includes(edge) ? 'green' : (wrongEdges.includes(edge) ? 'gray' : '#ccc');
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(edge.from.x, edge.from.y);
+        ctx.lineTo(edge.to.x, edge.to.y);
+        ctx.stroke();
+
+        const midX = (edge.from.x + edge.to.x) / 2;
+        const midY = (edge.from.y + edge.to.y) / 2;
+        ctx.fillStyle = 'blue';
+        ctx.font = '14px Segoe UI';
+        ctx.fillText(edge.weight, midX, midY);
+      }
+
+      for (const node of nodes) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 25, 0, Math.PI * 2);
+        ctx.fillStyle = (node === startNode) ? 'orange' : (node === selectedNode ? 'green' : '#3399ff');
+        ctx.fill();
+        ctx.strokeStyle = '#003366';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = 'white';
+        ctx.font = '14px Segoe UI';
+        ctx.fillText(node.id, node.x - 5, node.y + 5);
+      }
+    }
+
+    function selectStartNode() {
+      alert("Click on a node to set as the starting node.");
+      canvas.onclick = function(e) {
+        const { offsetX: x, offsetY: y } = e;
+        const clicked = nodes.find(n => Math.hypot(n.x - x, n.y - y) < 25);
+        if (clicked) {
+          startNode = clicked;
+          selectedNode = null;
+          draw();
+          canvas.onclick = null;
+        }
+      };
+    }
+
+    function runPrim() {
+      if (!startNode) return alert("Please select a starting node first.");
+
+      let visited = new Set();
+      let availableEdges = [];
+      mstEdges = [];
+      wrongEdges = [];
+      let summaryHTML = '<table><tr><th>Edge</th><th>Weight</th><th>Status</th></tr>';
+      let totalWeight = 0;
+
+      visited.add(startNode);
+
+      while (visited.size < nodes.length) {
+        availableEdges = edges.filter(e =>
+          (visited.has(e.from) && !visited.has(e.to)) ||
+          (visited.has(e.to) && !visited.has(e.from))
+        );
+
+        if (availableEdges.length === 0) break;
+
+        let minEdge = availableEdges.reduce((a, b) => a.weight < b.weight ? a : b);
+        mstEdges.push(minEdge);
+        totalWeight += minEdge.weight;
+        summaryHTML += `<tr><td>${minEdge.from.id} - ${minEdge.to.id}</td><td>${minEdge.weight}</td><td>✔</td></tr>`;
+        visited.add(visited.has(minEdge.from) ? minEdge.to : minEdge.from);
+
+        for (let e of availableEdges) {
+          if (e !== minEdge && !mstEdges.includes(e)) {
+            wrongEdges.push(e);
+            summaryHTML += `<tr><td>${e.from.id} - ${e.to.id}</td><td>${e.weight}</td><td class="wrong">✘</td></tr>`;
+          }
+        }
+      }
+
+      summaryHTML += '</table>';
+      document.getElementById('summary').innerHTML = summaryHTML;
+      document.getElementById('totalWeight').innerText = `Total Weight of MST: ${totalWeight}`;
+      draw();
+    }
+
+    function resetGraph() {
+      nodes = [];
+      edges = [];
+      mstEdges = [];
+      wrongEdges = [];
+      selectedNode = null;
+      startNode = null;
+      document.getElementById('summary').innerHTML = '';
+      document.getElementById('totalWeight').innerText = '';
+      draw();
+    }
+
+    draw();
+  </script>
+</body>
+</html>

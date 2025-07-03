@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fractional Knapsack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 51, 102, 0.2);
+      width: 90%;
+      max-width: 800px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #002244;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #e6f0ff;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+
+    th {
+      background-color: #cce0ff;
+      font-weight: bold;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #3399ff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background: #0066cc;
+    }
+
+    .summary {
+      margin-top: 1rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .back-button {
+      margin-top: 1.5rem;
+      background: #ccc;
+      color: #003366;
+      text-align: center;
+      padding: 0.75rem;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      width: 100%;
+      font-weight: bold;
+    }
+
+    .back-button:hover {
+      background: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Fractional Knapsack</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Item #</th>
+          <th>Weight</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody id="input-table">
+        <tr>
+          <td>1</td>
+          <td><input type="number" value="10" /></td>
+          <td><input type="number" value="60" /></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input type="number" value="20" /></td>
+          <td><input type="number" value="100" /></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input type="number" value="30" /></td>
+          <td><input type="number" value="120" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <input type="number" id="capacity" placeholder="Enter knapsack capacity" />
+    <button onclick="solveKnapsack()">Solve</button>
+
+    <div id="output"></div>
+    <a href="../index.html" class="back-button">⬅ Back to Index</a>
+  </div>
+
+  <script>
+    function solveKnapsack() {
+      const rows = document.querySelectorAll('#input-table tr');
+      const weights = [], values = [];
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('input');
+        weights.push(parseFloat(cells[0].value));
+        values.push(parseFloat(cells[1].value));
+      });
+
+      const capacity = parseFloat(document.getElementById('capacity').value);
+      const output = document.getElementById('output');
+
+      if (weights.length !== values.length || isNaN(capacity)) {
+        output.innerHTML = "<p class='summary'>⚠️ Please ensure valid input and capacity.</p>";
+        return;
+      }
+
+      let items = weights.map((w, i) => ({
+        index: i + 1,
+        weight: w,
+        value: values[i],
+        ratio: values[i] / w
+      }));
+
+      items.sort((a, b) => b.ratio - a.ratio);
+
+      let totalValue = 0;
+      let remaining = capacity;
+      let tableRows = '';
+
+      for (let item of items) {
+        if (remaining === 0) break;
+
+        if (item.weight <= remaining) {
+          totalValue += item.value;
+          remaining -= item.weight;
+          tableRows += `<tr><td>${item.index}</td><td>${item.weight}</td><td>${item.value}</td><td>100%</td></tr>`;
+        } else {
+          const fraction = remaining / item.weight;
+          totalValue += item.value * fraction;
+          tableRows += `<tr><td>${item.index}</td><td>${item.weight}</td><td>${item.value}</td><td>${(fraction * 100).toFixed(2)}%</td></tr>`;
+          break;
+        }
+      }
+
+      output.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Item #</th>
+              <th>Weight</th>
+              <th>Value</th>
+              <th>Fraction Taken</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+        <p class="summary">💰 Total value collected: ${totalValue.toFixed(2)}</p>
+      `;
+    }
+  </script>
+</body>
+</html>

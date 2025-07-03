@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🏅 Activity Lineup Optimizer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #e1f5fe);
+      color: #003366;
+      min-height: 100vh;
+      padding: 40px;
+      position: relative;
+    }
+
+    .profile-picture {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      border: 4px solid #0288d1;
+      border-radius: 50%;
+      padding: 3px;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 90px;
+      height: 90px;
+      z-index: 10;
+    }
+
+    .profile-picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    header {
+      text-align: center;
+      font-size: 2rem;
+      color: #01579b;
+      margin-bottom: 2rem;
+      text-shadow: 1px 1px #b3e5fc;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      background: #ffffffcc;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .input-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #81d4fa;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #0288d1;
+      color: white;
+      border: none;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0277bd;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      background: #e1f5fe;
+      border: 1px solid #81d4fa;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #b3e5fc;
+    }
+
+    th {
+      background-color: #b3e5fc;
+      color: #01579b;
+    }
+
+    .chart-container {
+      overflow-x: auto;
+      margin-top: 2rem;
+    }
+
+    .bar {
+      position: absolute;
+      height: 30px;
+      border: 1px solid #0288d1;
+      background-color: rgba(2, 136, 209, 0.3);
+      color: #003366;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      width: 1000px;
+      height: auto;
+      margin-top: 1rem;
+    }
+
+    .chart-row {
+      position: relative;
+      height: 40px;
+      border-bottom: 1px dashed #90caf9;
+    }
+
+    .timeline {
+      position: relative;
+      width: 1000px;
+      overflow-x: scroll;
+      border-left: 2px solid #81d4fa;
+    }
+
+    .timeline-scale {
+      display: flex;
+      position: relative;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+    }
+
+    .timeline-scale div {
+      width: 40px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px;
+      }
+      main {
+        padding: 1rem;
+      }
+      .profile-picture {
+        width: 70px;
+        height: 70px;
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="profile-picture">
+    <img src="https://scontent.fceb6-1.fna.fbcdn.net/v/t39.30808-1/500684316_1111722254322229_3570693525122643456_n.jpg?stp=dst-jpg_s100x100_tt6&_nc_cat=105&ccb=1-7&_nc_sid=e99d92&_nc_ohc=7V9lAMu0zQ0Q7kNvwFnPSAO&_nc_oc=AdkR53xhjKwlXrGcp2eR9RApDGbcrb4aq3hSR4ZLJ60szFhp8khCnza9rPvGSCdZgfMtK_N0y6hRAZBcTGXEyxds&_nc_zt=24&_nc_ht=scontent.fceb6-1.fna&_nc_gid=TxrEvXcPEfNSpKTdNExc3g&oh=00_AfM2O5OdpvYAzQ7vnhPJ4Lx5iII2xrRy2hwVVda7kDe_6g&oe=685AA0BB" alt="Profile" />
+  </div>
+
+  <header>🏅 Activity Lineup Optimizer</header>
+  <main>
+    <div class="input-group">
+      <input type="number" id="start-time" placeholder="Start Time" min="0">
+      <input type="number" id="end-time" placeholder="End Time" min="1">
+      <button onclick="addActivity()">➕ Add Match</button>
+      <button onclick="generateRandomActivities()">🎲 Randomize Schedule</button>
+    </div>
+    <button onclick="solveActivitySelection()">🏁 Optimize Lineup</button>
+
+    <table id="activity-table">
+      <thead>
+        <tr>
+          <th>Match</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="activity-body"></tbody>
+    </table>
+
+    <div class="timeline">
+      <div class="chart-wrapper" id="chart"></div>
+      <div class="timeline-scale" id="scale"></div>
+    </div>
+  </main>
+
+  <script>
+    let activities = [];
+    let selectedActivities = [];
+
+    function addActivity() {
+      const start = parseInt(document.getElementById('start-time').value);
+      const end = parseInt(document.getElementById('end-time').value);
+      if (isNaN(start) || isNaN(end) || start >= end) {
+        alert('⛔ Invalid times! Start must be less than End.');
+        return;
+      }
+      activities.push({ start, end });
+      document.getElementById('start-time').value = '';
+      document.getElementById('end-time').value = '';
+      selectedActivities = [];
+      updateTable();
+      drawChart();
+    }
+
+    function updateTable() {
+      const tbody = document.getElementById('activity-body');
+      tbody.innerHTML = '';
+      const selectedSet = new Set(selectedActivities.map(a => `${a.start}-${a.end}`));
+      activities.forEach(({ start, end }, index) => {
+        const row = document.createElement('tr');
+        const status = selectedSet.has(`${start}-${end}`) ? '✅' : '❌';
+        row.innerHTML = `<td>Game ${index + 1}</td><td>${start}</td><td>${end}</td><td>${status}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function solveActivitySelection() {
+      if (activities.length === 0) return;
+      const sorted = [...activities].sort((a, b) => a.end - b.end);
+      selectedActivities = [sorted[0]];
+      let lastEnd = sorted[0].end;
+
+      for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i].start >= lastEnd) {
+          selectedActivities.push(sorted[i]);
+          lastEnd = sorted[i].end;
+        }
+      }
+
+      updateTable();
+      drawChart();
+    }
+
+    function generateRandomActivities() {
+      activities = [];
+      const n = Math.floor(Math.random() * 5) + 5;
+      for (let i = 0; i < n; i++) {
+        let start = Math.floor(Math.random() * 20);
+        let end = start + Math.floor(Math.random() * 10) + 1;
+        activities.push({ start, end });
+      }
+      selectedActivities = [];
+      updateTable();
+      drawChart();
+    }
+
+    function drawChart() {
+      const container = document.getElementById('chart');
+      container.innerHTML = '';
+
+      const selectedSet = new Set(selectedActivities.map(a => `${a.start}-${a.end}`));
+
+      activities.forEach((a, i) => {
+        const row = document.createElement('div');
+        row.className = 'chart-row';
+
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.left = (a.start * 40) + 'px';
+        bar.style.width = ((a.end - a.start) * 40) + 'px';
+        bar.style.top = '5px';
+        bar.style.backgroundColor = selectedSet.has(`${a.start}-${a.end}`) ? 'rgba(2,136,209,0.5)' : 'rgba(144,202,249,0.4)';
+        bar.textContent = `G${i + 1}`;
+
+        row.appendChild(bar);
+        container.appendChild(row);
+      });
+
+      const maxTime = Math.max(...activities.map(a => a.end), 10);
+      const scale = document.getElementById('scale');
+      scale.innerHTML = '';
+      for (let i = 0; i <= maxTime; i++) {
+        const tick = document.createElement('div');
+        tick.textContent = i;
+        scale.appendChild(tick);
+      }
+    }
+  </script>
+</body>
+</html>

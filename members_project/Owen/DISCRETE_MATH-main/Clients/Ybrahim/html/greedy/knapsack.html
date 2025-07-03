@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🏋️ Fractional Knapsack Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #e3f2fd, #bbdefb);
+      color: #0d47a1;
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+      position: relative;
+    }
+
+    .profile-picture {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      border: 4px solid #42a5f5;
+      border-radius: 50%;
+      padding: 3px;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100px;
+      height: 100px;
+      z-index: 10;
+    }
+
+    .profile-picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+      color: #1565c0;
+      text-shadow: 1px 1px #bbdefb;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      background: #ffffff;
+      border: 1px solid #90caf9;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      border: 1px solid #e3f2fd;
+      text-align: center;
+    }
+
+    th {
+      background: #e3f2fd;
+      color: #0d47a1;
+    }
+
+    input[type="number"] {
+      font-size: 1rem;
+      padding: 0.4rem;
+      border: 1px solid #64b5f6;
+      border-radius: 6px;
+      width: 80px;
+      background: #f0f9ff;
+      color: #0d47a1;
+    }
+
+    button {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      background: #42a5f5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #1e88e5;
+    }
+
+    .controls {
+      margin: 1.5rem 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+
+      input[type="number"] {
+        width: 100%;
+      }
+
+      .profile-picture {
+        width: 80px;
+        height: 80px;
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Profile Picture -->
+  <div class="profile-picture">
+    <img src="https://scontent.fceb6-1.fna.fbcdn.net/v/t39.30808-1/500684316_1111722254322229_3570693525122643456_n.jpg?stp=dst-jpg_s100x100_tt6&_nc_cat=105&ccb=1-7&_nc_sid=e99d92&_nc_ohc=7V9lAMu0zQ0Q7kNvwFnPSAO&_nc_oc=AdkR53xhjKwlXrGcp2eR9RApDGbcrb4aq3hSR4ZLJ60szFhp8khCnza9rPvGSCdZgfMtK_N0y6hRAZBcTGXEyxds&_nc_zt=24&_nc_ht=scontent.fceb6-1.fna&_nc_gid=TxrEvXcPEfNSpKTdNExc3g&oh=00_AfM2O5OdpvYAzQ7vnhPJ4Lx5iII2xrRy2hwVVda7kDe_6g&oe=685AA0BB" alt="Profile" />
+  </div>
+
+  <h1>🏋️ Fractional Knapsack Arena</h1>
+
+  <div class="controls">
+    <label>Knapsack Capacity:
+      <input type="number" id="capacity" value="50" min="1">
+    </label>
+    <button onclick="addRow()">Add Item</button>
+    <button onclick="computeKnapsack()">Compute</button>
+  </div>
+
+  <table id="itemTable">
+    <thead>
+      <tr>
+        <th>🏷️ Item</th>
+        <th>💰 Value</th>
+        <th>⚖️ Weight</th>
+        <th>🗑️ Remove</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>🏆 Selected Items</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>🏷️ Item</th>
+        <th>💰 Value</th>
+        <th>⚖️ Weight</th>
+        <th>📊 Fraction Taken</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3 id="totalValue"></h3>
+
+  <script>
+    let itemId = 1;
+
+    function addRow(value = '', weight = '') {
+      const tbody = document.querySelector('#itemTable tbody');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>Item ${itemId}</td>
+        <td><input type="number" min="0" step="any" value="${value}"></td>
+        <td><input type="number" min="0.1" step="any" value="${weight}"></td>
+        <td><button onclick="this.parentElement.parentElement.remove()">Remove</button></td>
+      `;
+      tbody.appendChild(row);
+      itemId++;
+    }
+
+    function computeKnapsack() {
+      const capacity = parseFloat(document.getElementById('capacity').value);
+      const rows = document.querySelectorAll('#itemTable tbody tr');
+      const items = [];
+
+      rows.forEach((row, index) => {
+        const inputs = row.querySelectorAll('input');
+        const value = parseFloat(inputs[0].value);
+        const weight = parseFloat(inputs[1].value);
+        if (!isNaN(value) && !isNaN(weight) && weight > 0) {
+          items.push({
+            index: index + 1,
+            value,
+            weight,
+            ratio: value / weight
+          });
+        }
+      });
+
+      items.sort((a, b) => b.ratio - a.ratio);
+
+      let remaining = capacity;
+      let totalValue = 0;
+      const selected = [];
+
+      for (const item of items) {
+        if (remaining <= 0) break;
+        const takeWeight = Math.min(item.weight, remaining);
+        const fraction = takeWeight / item.weight;
+        totalValue += item.value * fraction;
+        remaining -= takeWeight;
+
+        selected.push({
+          index: item.index,
+          value: item.value,
+          weight: item.weight,
+          fraction: fraction.toFixed(2)
+        });
+      }
+
+      const resTbody = document.querySelector('#resultTable tbody');
+      resTbody.innerHTML = "";
+      selected.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>Item ${item.index}</td>
+          <td>${item.value}</td>
+          <td>${item.weight}</td>
+          <td>${item.fraction}</td>
+        `;
+        resTbody.appendChild(row);
+      });
+
+      document.getElementById('totalValue').textContent = `🏅 Total value obtained: ${totalValue.toFixed(2)}`;
+    }
+
+    // Initialize with 3 rows
+    addRow(60, 10);
+    addRow(100, 20);
+    addRow(120, 30);
+  </script>
+</body>
+</html>

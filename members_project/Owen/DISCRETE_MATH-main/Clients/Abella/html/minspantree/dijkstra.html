@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🛰️ Dijkstra’s Route</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: radial-gradient(circle at center, #111 0%, #000 100%);
+      color: #fff8c6;
+      font-family: 'Orbitron', sans-serif;
+      background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #f1e965;
+      font-size: 2.8rem;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      padding: 0.5rem 1.2rem;
+      border: 2px dashed #f1e965;
+      display: inline-block;
+      text-shadow: 0 0 6px #f1e965;
+    }
+
+    .controls {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    button {
+      margin: 0.5rem;
+      padding: 0.7rem 1.4rem;
+      font-size: 1rem;
+      font-weight: bold;
+      border: 2px solid #f1e965;
+      background: #1a1a1a;
+      color: #fffcc9;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0 0 10px rgba(241, 233, 101, 0.4);
+    }
+
+    button:hover {
+      background: #2a2a2a;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(241, 233, 101, 0.7);
+    }
+
+    canvas {
+      border: 3px solid #f1e965;
+      display: block;
+      margin: 1.5rem auto;
+      background: #1a1a1a;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
+    }
+
+    .summary {
+      margin-top: 2rem;
+      background: #1a1a1a;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(255, 255, 0, 0.2);
+      border: 1px dashed #f1e965;
+    }
+
+    .summary h3 {
+      color: #fffcc9;
+      margin-bottom: 1rem;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    ul, ol {
+      padding-left: 1.2rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    strong {
+      color: #f1e965;
+    }
+
+    .back-button {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .back-button a {
+      display: inline-block;
+      background-color: #f1e965;
+      color: #000;
+      padding: 0.6rem 1.2rem;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 0 10px rgba(241, 233, 101, 0.3);
+    }
+
+    .back-button a:hover {
+      background-color: #b5a832;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🛰️ Dijkstra’s Route</h1>
+  <div class="controls">
+    <button onclick="addNode()">Add Node</button>
+    <button onclick="randomizeGraph()">Randomize</button>
+    <button onclick="selectStart()">Select Start Node</button>
+    <button onclick="runDijkstra()">Run Dijkstra</button>
+  </div>
+  <canvas id="graphCanvas" width="900" height="600"></canvas>
+  <div class="summary" id="summary"></div>
+  <div class="back-button">
+    <a href="index.html">&larr; Return to Galaxy Index</a>
+  </div>
+
+<script>
+// [The entire JavaScript from your original code remains unchanged here]
+</script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kruskal's Algorithm Visualizer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 51, 102, 0.2);
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      color: #002244;
+    }
+    canvas {
+      border: 2px solid #3399ff;
+      border-radius: 8px;
+      margin-top: 1rem;
+      cursor: grab;
+    }
+    .controls {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1rem;
+    }
+    button {
+      padding: 0.75rem 1.25rem;
+      background: #3399ff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #0066cc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Kruskal's Algorithm Visualizer</h1>
+    <canvas id="graph" width="800" height="500"></canvas>
+    <div class="controls">
+      <button onclick="runKruskal()">Run Kruskal's Algorithm</button>
+      <button onclick="resetGraph()">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('graph');
+    const ctx = canvas.getContext('2d');
+    let nodes = [];
+    let edges = [];
+    let selectedNode = null;
+    let mstEdges = [];
+    let draggingNode = null;
+
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    canvas.addEventListener('mousedown', (e) => {
+      const { offsetX: x, offsetY: y } = e;
+      if (e.button === 2) return; // ignore right-click here
+      draggingNode = nodes.find(n => Math.hypot(n.x - x, n.y - y) < 25) || null;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (draggingNode) {
+        draggingNode.x = e.offsetX;
+        draggingNode.y = e.offsetY;
+        draw();
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      draggingNode = null;
+    });
+
+    canvas.addEventListener('click', (e) => {
+      const { offsetX: x, offsetY: y } = e;
+      const clicked = nodes.find(n => Math.hypot(n.x - x, n.y - y) < 25);
+
+      if (clicked) {
+        if (!selectedNode) {
+          selectedNode = clicked;
+        } else if (selectedNode !== clicked) {
+          const weight = prompt("Enter edge weight:");
+          if (!isNaN(weight) && weight !== null && weight !== '') {
+            edges.push({ from: selectedNode, to: clicked, weight: parseFloat(weight) });
+            selectedNode = null;
+            draw();
+          }
+        }
+      } else {
+        nodes.push({ x, y, id: nodes.length });
+        draw();
+      }
+    });
+
+    canvas.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const { offsetX: x, offsetY: y } = e;
+      const index = nodes.findIndex(n => Math.hypot(n.x - x, n.y - y) < 25);
+      if (index !== -1) {
+        const removedNode = nodes[index];
+        nodes.splice(index, 1);
+        edges = edges.filter(edge => edge.from !== removedNode && edge.to !== removedNode);
+        selectedNode = null;
+        draw();
+      }
+    });
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (const edge of edges) {
+        ctx.strokeStyle = mstEdges.includes(edge) ? 'green' : 'gray';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(edge.from.x, edge.from.y);
+        ctx.lineTo(edge.to.x, edge.to.y);
+        ctx.stroke();
+
+        const midX = (edge.from.x + edge.to.x) / 2;
+        const midY = (edge.from.y + edge.to.y) / 2;
+        ctx.fillStyle = 'blue';
+        ctx.font = '14px Segoe UI';
+        ctx.fillText(edge.weight, midX, midY);
+      }
+
+      for (const node of nodes) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 25, 0, Math.PI * 2);
+        ctx.fillStyle = (node === selectedNode) ? 'green' : '#3399ff';
+        ctx.fill();
+        ctx.strokeStyle = '#003366';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = 'white';
+        ctx.font = '14px Segoe UI';
+        ctx.fillText(node.id, node.x - 5, node.y + 5);
+      }
+    }
+
+    function find(parent, i) {
+      if (parent[i] === i) return i;
+      return parent[i] = find(parent, parent[i]);
+    }
+
+    function union(parent, rank, x, y) {
+      const xroot = find(parent, x);
+      const yroot = find(parent, y);
+      if (rank[xroot] < rank[yroot]) {
+        parent[xroot] = yroot;
+      } else if (rank[xroot] > rank[yroot]) {
+        parent[yroot] = xroot;
+      } else {
+        parent[yroot] = xroot;
+        rank[xroot]++;
+      }
+    }
+
+    function runKruskal() {
+      const sortedEdges = [...edges].sort((a, b) => a.weight - b.weight);
+      const parent = Array(nodes.length).fill().map((_, i) => i);
+      const rank = Array(nodes.length).fill(0);
+
+      mstEdges = [];
+
+      for (const edge of sortedEdges) {
+        const u = edge.from.id;
+        const v = edge.to.id;
+        const setU = find(parent, u);
+        const setV = find(parent, v);
+
+        if (setU !== setV) {
+          mstEdges.push(edge);
+          union(parent, rank, setU, setV);
+        }
+      }
+
+      draw();
+    }
+
+    function resetGraph() {
+      nodes = [];
+      edges = [];
+      mstEdges = [];
+      selectedNode = null;
+      draw();
+    }
+
+    draw();
+  </script>
+</body>
+</html>

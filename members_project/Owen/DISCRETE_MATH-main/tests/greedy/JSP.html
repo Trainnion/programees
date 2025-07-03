@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Job Sequencing with Deadlines</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+      color: #00ffc8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: #1b1f3b;
+      border-radius: 10px;
+      box-shadow: 0 0 25px #00ffc840;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ffc8;
+      text-shadow: 0 0 10px #00ffc8;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 1rem;
+      border-collapse: collapse;
+      background: #141b2d;
+      box-shadow: 0 0 15px #00ffc820;
+    }
+
+    th, td {
+      padding: 0.7rem;
+      text-align: center;
+      border: 1px solid #00ffc840;
+    }
+
+    th {
+      background-color: #0f172a;
+      color: #00ffc8;
+    }
+
+    td input {
+      width: 80%;
+      padding: 0.3rem;
+      border-radius: 5px;
+      border: 1px solid #00ffc850;
+      background: #0f172a;
+      color: #00ffc8;
+    }
+
+    button {
+      margin: 1rem 0.5rem;
+      padding: 0.6rem 1.2rem;
+      background-color: transparent;
+      border: 2px solid #00ffc8;
+      color: #00ffc8;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 0 10px #00ffc860;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00ffc8;
+      color: #1b1f3b;
+      transform: scale(1.05);
+    }
+
+    .output-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #141b2d;
+      border-left: 4px solid #00ffc8;
+      border-radius: 5px;
+      box-shadow: 0 0 15px #00ffc850;
+    }
+
+    .output-table {
+      margin-top: 1rem;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .output-table th, .output-table td {
+      border: 1px solid #00ffc840;
+      padding: 0.5rem;
+    }
+
+    .output-table th {
+      background-color: #0f172a;
+    }
+
+    .output-table td {
+      background-color: #1a1f2b;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    .error {
+      color: #ff6666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Job Sequencing with Deadlines</h1>
+
+    <table id="jobTable">
+      <thead>
+        <tr>
+          <th>Job ID</th>
+          <th>Deadline</th>
+          <th>Profit</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text" value="A"></td>
+          <td><input type="number" value="2"></td>
+          <td><input type="number" value="100"></td>
+          <td><button onclick="removeRow(this)">🗑️</button></td>
+        </tr>
+        <tr>
+          <td><input type="text" value="B"></td>
+          <td><input type="number" value="1"></td>
+          <td><input type="number" value="19"></td>
+          <td><button onclick="removeRow(this)">🗑️</button></td>
+        </tr>
+        <tr>
+          <td><input type="text" value="C"></td>
+          <td><input type="number" value="2"></td>
+          <td><input type="number" value="27"></td>
+          <td><button onclick="removeRow(this)">🗑️</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button onclick="addRow()">➕ Add Job</button>
+    <button onclick="runJobSequencing()">🚀 Run Algorithm</button>
+
+    <div id="output" class="output-box"></div>
+  </div>
+
+  <script>
+    function addRow() {
+      const table = document.getElementById("jobTable").getElementsByTagName("tbody")[0];
+      const row = table.insertRow();
+      row.innerHTML = `
+        <td><input type="text" /></td>
+        <td><input type="number" /></td>
+        <td><input type="number" /></td>
+        <td><button onclick="removeRow(this)">🗑️</button></td>
+      `;
+    }
+
+    function removeRow(button) {
+      const row = button.parentNode.parentNode;
+      row.parentNode.removeChild(row);
+    }
+
+    function runJobSequencing() {
+      const table = document.getElementById("jobTable").getElementsByTagName("tbody")[0];
+      const rows = table.getElementsByTagName("tr");
+      const output = document.getElementById("output");
+      output.innerHTML = "";
+
+      let jobs = [];
+      let invalidJobs = 0;
+
+      for (let row of rows) {
+        const cells = row.getElementsByTagName("td");
+        const id = cells[0].querySelector("input").value.trim();
+        const deadline = parseInt(cells[1].querySelector("input").value);
+        const profit = parseInt(cells[2].querySelector("input").value);
+
+        if (!id || isNaN(deadline) || isNaN(profit) || deadline <= 0 || profit <= 0 || deadline > 100) {
+          invalidJobs++;
+          continue;
+        }
+
+        jobs.push({ id, deadline, profit });
+      }
+
+      if (jobs.length === 0) {
+        output.innerHTML = "<p class='error'>❌ Please enter at least one valid job (with deadline ≤ 100).</p>";
+        return;
+      }
+
+      jobs.sort((a, b) => b.profit - a.profit);
+
+      const maxDeadline = Math.max(...jobs.map(job => job.deadline));
+      const schedule = new Array(maxDeadline).fill(null);
+
+      let steps = [];
+      let scheduled = [];
+
+      for (let job of jobs) {
+        for (let j = job.deadline - 1; j >= 0; j--) {
+          if (!schedule[j]) {
+            schedule[j] = job.id;
+            scheduled.push(job);
+            steps.push(`<li>📌 Job <strong>${job.id}</strong> scheduled at time slot ${j + 1} (Profit: ${job.profit})</li>`);
+            break;
+          }
+        }
+      }
+
+      const scheduledIds = scheduled.map(j => j.id);
+      const unscheduled = jobs.filter(j => !scheduledIds.includes(j.id));
+
+      let tableHTML = `<table class='output-table'><thead><tr><th>Job ID</th><th>Deadline</th><th>Profit</th><th>Status</th></tr></thead><tbody>`;
+      for (let job of jobs) {
+        const isScheduled = scheduledIds.includes(job.id);
+        tableHTML += `<tr><td>${job.id}</td><td>${job.deadline}</td><td>${job.profit}</td><td>${isScheduled ? '✅ Scheduled' : '❌ Unscheduled'}</td></tr>`;
+      }
+      tableHTML += `</tbody></table>`;
+
+      output.innerHTML = `
+        <p><strong>✅ Scheduled Jobs:</strong> ${scheduledIds.join(" → ") || "None"}</p>
+        <p><strong>🕒 Schedule Order:</strong> ${schedule.map((id, i) => id ? `Slot ${i + 1}: ${id}` : `Slot ${i + 1}: Empty`).join("<br>")}</p>
+        <p><strong>🚫 Unscheduled Jobs:</strong> ${unscheduled.map(j => j.id).join(", ") || "None"}</p>
+        <ul>${steps.join("")}</ul>
+        ${tableHTML}
+        ${invalidJobs > 0 ? `<p class="error">⚠️ Skipped ${invalidJobs} invalid job(s).</p>` : ""}
+      `;
+    }
+  </script>
+</body>
+</html>

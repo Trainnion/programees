@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Egyptian Fraction - Gamer Style</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(to bottom right, #0f0c29, #302b63, #24243e);
+      margin: 0;
+      padding: 0;
+      color: #00ffc8;
+    }
+
+    .container {
+      background-color: #1b1f3b;
+      margin: 2rem auto;
+      max-width: 700px;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 25px #00ffc840;
+      border: 1px solid #00ffc830;
+    }
+
+    .profile-img {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #00ffc8;
+      box-shadow: 0 0 15px #00ffc8;
+      z-index: 1000;
+    }
+
+    h1 {
+      color: #00ffc8;
+      text-align: center;
+      font-size: 2rem;
+      text-shadow: 0 0 12px #00ffc8;
+    }
+
+    label {
+      font-weight: 500;
+      margin-right: 1rem;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      padding: 0.3rem;
+      margin-right: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #00ffc8;
+      background: #0f172a;
+      color: #00ffc8;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    button {
+      padding: 0.6rem 1.2rem;
+      background-color: #1b1f3b;
+      color: #00ffc8;
+      border: 2px solid #00ffc8;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      font-weight: bold;
+      box-shadow: 0 0 12px #00ffc880, 0 0 20px #00ffc820 inset;
+    }
+
+    button:hover {
+      background-color: #00ffc8;
+      color: #1b1f3b;
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #00ffc8, 0 0 30px #00ffc8 inset;
+    }
+
+    .result, .step-list {
+      margin-top: 2rem;
+      background: #141b2d;
+      padding: 1rem;
+      border-left: 4px solid #00ffc8;
+      border-radius: 5px;
+      box-shadow: 0 0 15px #00ffc850;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+      list-style-type: square;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      margin: 0.5rem 0;
+    }
+
+    @media (max-width: 600px) {
+      .profile-img {
+        width: 60px;
+        height: 60px;
+        top: 15px;
+        right: 15px;
+      }
+
+      .container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+
+      button {
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <img src="../assets/owen.jpeg" alt="Profile Image" class="profile-img" />
+
+  <div class="container">
+    <h1>Egyptian Fraction Representation</h1>
+    <p>Enter a proper fraction (numerator < denominator):</p>
+    <label>Numerator: <input type="number" id="numerator" value="4"></label>
+    <label>Denominator: <input type="number" id="denominator" value="13"></label>
+    <button onclick="computeEgyptianFraction()">Run Algorithm</button>
+
+    <div class="result">
+      <p><strong>Final Result:</strong> <span id="output"></span></p>
+    </div>
+
+    <div class="step-list">
+      <h3>Steps:</h3>
+      <ul id="steps"></ul>
+    </div>
+  </div>
+
+  <script>
+    function computeEgyptianFraction() {
+      let num = parseInt(document.getElementById("numerator").value);
+      let den = parseInt(document.getElementById("denominator").value);
+      const output = document.getElementById("output");
+      const steps = document.getElementById("steps");
+      steps.innerHTML = "";
+
+      if (isNaN(num) || isNaN(den) || num <= 0 || den <= 0 || num >= den) {
+        output.textContent = "Please enter a valid proper fraction (numerator < denominator).";
+        return;
+      }
+
+      let result = [];
+      let stepCount = 1;
+
+      while (num !== 0) {
+        let x = Math.ceil(den / num);
+        result.push(`1/${x}`);
+
+        const li1 = document.createElement("li");
+        li1.textContent = `Step ${stepCount++}: 1/${x} is the largest unit fraction ≤ ${num}/${den}`;
+        steps.appendChild(li1);
+
+        // Update numerator and denominator
+        num = num * x - den;
+        den = den * x;
+
+        // Simplify the fraction
+        const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+        const g = gcd(num, den);
+        num = Math.floor(num / g);
+        den = Math.floor(den / g);
+
+        if (num > 0) {
+          const li2 = document.createElement("li");
+          li2.textContent = `→ Remaining fraction: ${num}/${den}`;
+          steps.appendChild(li2);
+        }
+      }
+
+      output.textContent = result.join(" + ");
+    }
+  </script>
+</body>
+</html>

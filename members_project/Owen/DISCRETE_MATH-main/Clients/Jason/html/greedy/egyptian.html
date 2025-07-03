@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Egyptian Fraction Solver</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9fbfd;
+      color: #333;
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      color: #1a237e;
+      text-align: center;
+    }
+    .input-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    input[type="number"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      font-size: 1rem;
+      padding: 0.7rem 1.2rem;
+      background-color: #1a237e;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0d164d;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    th {
+      background-color: #e3f2fd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Egyptian Fraction Solver</h1>
+
+  <div class="input-group">
+    <input type="number" id="numerator" placeholder="Numerator (eg: 2)" min="1" />
+    <input type="number" id="denominator" placeholder="Denominator (eg: 7)" min="1" />
+    <button onclick="solveEgyptianFraction()">Solve</button>
+  </div>
+
+  <table id="result-table" style="display:none;">
+    <thead>
+      <tr>
+        <th>Step</th>
+        <th>Unit Fraction</th>
+        <th>Remaining Fraction</th>
+      </tr>
+    </thead>
+    <tbody id="result-body"></tbody>
+  </table>
+
+  <script>
+    function solveEgyptianFraction() {
+      const num = parseInt(document.getElementById('numerator').value);
+      const den = parseInt(document.getElementById('denominator').value);
+      const tbody = document.getElementById('result-body');
+      const table = document.getElementById('result-table');
+
+      if (!num || !den || num <= 0 || den <= 0 || num >= den) {
+        alert("Please enter valid values such that 0 < numerator < denominator.");
+        return;
+      }
+
+      let a = num, b = den, step = 1;
+      tbody.innerHTML = '';
+      table.style.display = 'table';
+
+      while (a !== 0) {
+        const x = Math.ceil(b / a);
+        const unit = `1/${x}`;
+        const remainingNum = a * x - b;
+        const remainingDen = b * x;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${step++}</td>
+          <td>${unit}</td>
+          <td>${remainingNum}/${remainingDen}</td>
+        `;
+        tbody.appendChild(tr);
+
+        a = remainingNum;
+        b = remainingDen;
+      }
+    }
+  </script>
+</body>
+</html>

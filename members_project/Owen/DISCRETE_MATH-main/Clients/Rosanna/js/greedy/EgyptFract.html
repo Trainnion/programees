@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Egyptian Fraction</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 51, 102, 0.2);
+      width: 90%;
+      max-width: 600px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #002244;
+    }
+
+    input {
+      width: calc(50% - 0.5rem);
+      padding: 0.5rem;
+      margin: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #3399ff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background: #0066cc;
+    }
+
+    .output {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #e6f0ff;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .step {
+      margin: 0.5rem 0;
+    }
+
+    .back-button {
+      margin-top: 1.5rem;
+      background: #ccc;
+      color: #003366;
+      text-align: center;
+      padding: 0.75rem;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      width: 100%;
+      font-weight: bold;
+    }
+
+    .back-button:hover {
+      background: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Egyptian Fraction</h1>
+    <div>
+      <input type="number" id="numerator" placeholder="Numerator" />
+      <input type="number" id="denominator" placeholder="Denominator" />
+    </div>
+    <button onclick="convertToEgyptian()">Convert</button>
+    <div class="output" id="output"></div>
+    <a href="../index.html" class="back-button">⬅ Back to Index</a>
+  </div>
+
+  <script>
+    function convertToEgyptian() {
+      let num = parseInt(document.getElementById("numerator").value);
+      let den = parseInt(document.getElementById("denominator").value);
+      let outputDiv = document.getElementById("output");
+
+      if (!num || !den || num >= den || num <= 0 || den <= 0) {
+        outputDiv.innerHTML = "<p>⚠️ Please enter valid values: 0 < numerator < denominator.</p>";
+        return;
+      }
+
+      let result = [];
+      let steps = [];
+
+      while (num !== 0) {
+        let x = Math.ceil(den / num);
+        result.push("1/" + x);
+        steps.push(`<div class='step'>Step: 1/${x} added → ${num}/${den} - 1/${x}`);
+
+        num = num * x - den;
+        den = den * x;
+
+        let g = gcd(num, den);
+        num /= g;
+        den /= g;
+
+        steps[steps.length - 1] += ` = ${num}/${den}</div>`;
+      }
+
+      outputDiv.innerHTML = `
+        <p><strong>Egyptian Fraction:</strong> ${result.join(" + ")}</p>
+        <div><strong>Steps:</strong>${steps.join("")}</div>
+      `;
+    }
+
+    function gcd(a, b) {
+      while (b !== 0) {
+        let temp = b;
+        b = a % b;
+        a = temp;
+      }
+      return a;
+    }
+  </script>
+</body>
+</html>

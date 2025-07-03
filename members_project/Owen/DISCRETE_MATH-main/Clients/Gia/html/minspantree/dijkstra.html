@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dijkstra's Algorithm</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(to right, #1a0033, #0d001f);
+      color: #f8f8ff;
+      margin: 0;
+      padding: 40px;
+    }
+    h1 {
+      text-align: center;
+      color: #d891ff;
+      margin-bottom: 2rem;
+      text-shadow: 0 0 15px #d891ff;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    button {
+      margin: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      background-color: #d891ff;
+      color: #000;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 12px #d891ff;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+    button:hover {
+      background-color: #a64ef4;
+      box-shadow: 0 0 20px #a64ef4, 0 0 30px #a64ef4;
+    }
+    canvas {
+      border: 2px solid #d891ff55;
+      display: block;
+      margin: auto;
+      background: #0a001a;
+      border-radius: 16px;
+      box-shadow: 0 0 20px #d891ff44;
+    }
+    .summary {
+      margin-top: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(14px);
+    }
+    .summary h3 {
+      color: #ffb3ff;
+    }
+    .summary table {
+      width: 100%;
+      margin-top: 1rem;
+      border-collapse: collapse;
+      color: #fff;
+    }
+    .summary th, .summary td {
+      border: 1px solid #d891ff66;
+      padding: 0.5rem 1rem;
+      text-align: center;
+    }
+    .summary th {
+      background: #d891ff22;
+    }
+    .back-button {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .back-button a {
+      display: inline-block;
+      background-color: #7a1fa2;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      box-shadow: 0 0 12px #a64ef4;
+    }
+    .back-button a:hover {
+      background-color: #4a0072;
+      box-shadow: 0 0 20px #ffb3ff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dijkstra's Algorithm</h1>
+  <div class="controls">
+    <button onclick="addNode()">Add Node</button>
+    <button onclick="randomizeGraph()">Randomize</button>
+    <button onclick="selectStart()">Select Start Node</button>
+    <button onclick="runDijkstra()">Run Dijkstra</button>
+  </div>
+  <canvas id="graphCanvas" width="900" height="600"></canvas>
+  <div class="summary" id="summary"></div>
+  <div class="back-button">
+    <a href="../index.html">&larr; Back to Index</a>
+  </div>
+  <script>
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const nodes = [];
+    const edges = [];
+    const radius = 20;
+    let selectedNode = null;
+    let startNode = null;
+
+    function drawArrow(from, to, color = '#bb86fc') {
+      const headlen = 10;
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const angle = Math.atan2(dy, dx);
+      const offsetX = radius * Math.cos(angle);
+      const offsetY = radius * Math.sin(angle);
+      const startX = from.x + offsetX;
+      const startY = from.y + offsetY;
+      const endX = to.x - offsetX;
+      const endY = to.y - offsetY;
+
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(endX, endY);
+      ctx.lineTo(endX - headlen * Math.cos(angle - Math.PI / 6), endY - headlen * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(endX - headlen * Math.cos(angle + Math.PI / 6), endY - headlen * Math.sin(angle + Math.PI / 6));
+      ctx.lineTo(endX, endY);
+      ctx.fill();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const edge of edges) {
+        drawArrow(edge.from, edge.to, edge.color || '#bb86fc');
+        const midX = (edge.from.x + edge.to.x) / 2;
+        const midY = (edge.from.y + edge.to.y) / 2;
+        ctx.fillStyle = '#ffb3ff';
+        ctx.fillRect(midX - 15, midY - 10, 30, 20);
+        ctx.fillStyle = '#000';
+        ctx.fillText(edge.weight, midX - 5, midY + 5);
+      }
+      for (const node of nodes) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = node === startNode ? '#d64fff' : '#bb86fc';
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
+        ctx.fillStyle = '#000';
+        ctx.fillText(node.label, node.x - 5, node.y + 4);
+      }
+    }
+
+    function addNode() {
+      const label = `N${nodes.length + 1}`;
+      const x = Math.random() * (canvas.width - 100) + 50;
+      const y = Math.random() * (canvas.height - 100) + 50;
+      nodes.push({ label, x, y });
+      draw();
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const clickedNode = nodes.find(n => Math.hypot(n.x - x, n.y - y) < radius);
+
+      if (clickedNode) {
+        if (!selectedNode) {
+          selectedNode = clickedNode;
+        } else if (selectedNode !== clickedNode) {
+          const weight = parseInt(prompt('Enter weight:'), 10);
+          if (!isNaN(weight)) {
+            edges.push({ from: selectedNode, to: clickedNode, weight });
+            draw();
+          }
+          selectedNode = null;
+        }
+      }
+    });
+
+    function randomizeGraph() {
+      nodes.length = 0;
+      edges.length = 0;
+      for (let i = 0; i < 6; i++) addNode();
+      for (let i = 0; i < 8; i++) {
+        const a = nodes[Math.floor(Math.random() * nodes.length)];
+        const b = nodes[Math.floor(Math.random() * nodes.length)];
+        if (a !== b) {
+          edges.push({ from: a, to: b, weight: Math.floor(Math.random() * 30) + 1 });
+        }
+      }
+      draw();
+    }
+
+    function selectStart() {
+      alert('Click a node to select it as the starting point.');
+      canvas.onclick = function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const clickedNode = nodes.find(n => Math.hypot(n.x - x, n.y - y) < radius);
+        if (clickedNode) {
+          startNode = clickedNode;
+          canvas.onclick = null;
+          draw();
+        }
+      };
+    }
+
+    async function runDijkstra() {
+      if (!startNode) return alert("Select a start node first.");
+      const dist = new Map(nodes.map(n => [n, Infinity]));
+      const prev = new Map();
+      dist.set(startNode, 0);
+      const visited = new Set();
+      let summary = `<h3>Steps:</h3><ol>`;
+
+      while (visited.size < nodes.length) {
+        let u = null;
+        let minDist = Infinity;
+        for (const n of nodes) {
+          if (!visited.has(n) && dist.get(n) < minDist) {
+            minDist = dist.get(n);
+            u = n;
+          }
+        }
+        if (!u) break;
+        visited.add(u);
+        summary += `<li>Visiting ${u.label}, current distance: ${dist.get(u)}</li>`;
+
+        for (const edge of edges.filter(e => e.from === u)) {
+          const v = edge.to;
+          if (dist.get(u) + edge.weight < dist.get(v)) {
+            dist.set(v, dist.get(u) + edge.weight);
+            prev.set(v, u);
+            edge.color = '#00ff99';
+            draw();
+            await new Promise(r => setTimeout(r, 500));
+          }
+        }
+      }
+
+      summary += '</ol><h3>Final Distances:</h3><ul>';
+      for (const [node, d] of dist.entries()) {
+        summary += `<li>${node.label}: ${d}</li>`;
+      }
+      summary += '</ul><h3>Vertex Table:</h3><table><tr><th>Vertex</th><th>Cheapest From (Start)</th><th>Previous Vertex</th></tr>';
+      for (const node of nodes) {
+        const d = dist.get(node);
+        const p = prev.get(node);
+        summary += `<tr><td>${node.label}</td><td>${d === Infinity ? '∞' : d}</td><td>${p ? p.label : '-'}</td></tr>`;
+      }
+      summary += '</table>';
+      document.getElementById('summary').innerHTML = summary;
+      draw();
+    }
+  </script>
+</body>
+</html>

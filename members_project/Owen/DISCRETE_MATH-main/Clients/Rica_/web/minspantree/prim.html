@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Prim's Algorithm</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(to right, #001f3f, #000428);
+      color: #f8f8ff;
+      min-height: 100vh;
+      padding: 40px;
+    }
+    h1 {
+      text-align: center;
+      color: #00ffff;
+      margin-bottom: 2rem;
+      text-shadow: 0 0 15px #00ffff;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    button {
+      margin: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      background-color: #00ffff;
+      color: #000;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 12px #00ffff;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+    button:hover {
+      background-color: #00bbff;
+      box-shadow: 0 0 20px #00bbff, 0 0 30px #00bbff;
+    }
+    canvas {
+      border: 2px solid #00ffff55;
+      display: block;
+      margin: auto;
+      background: #00091a;
+      border-radius: 16px;
+      box-shadow: 0 0 20px #00ffff44;
+    }
+    .summary {
+      margin-top: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(14px);
+    }
+    .summary h3 {
+      color: #00ffff;
+    }
+    .summary li {
+      margin-bottom: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Prim's Algorithm</h1>
+  <div class="controls">
+    <button onclick="addNode()">Add Node</button>
+    <button onclick="randomizeGraph()">Randomize</button>
+    <button onclick="startPrimMode()">Run Prim</button>
+  </div>
+  <canvas id="graphCanvas" width="900" height="600"></canvas>
+  <div class="summary" id="summary"></div>
+  <script>
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const nodes = [];
+    const edges = [];
+    let selectedNode = null;
+    const radius = 20;
+    const edgeColors = new Map();
+    let selectingStart = false;
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (const edge of edges) {
+        const { from, to, weight } = edge;
+        const color = edgeColors.get(edge) || '#888';
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.stroke();
+
+        const midX = (from.x + to.x) / 2;
+        const midY = (from.y + to.y) / 2;
+        ctx.fillStyle = '#00ffff';
+        ctx.fillRect(midX - 15, midY - 10, 30, 20);
+        ctx.fillStyle = '#000';
+        ctx.fillText(weight, midX - 5, midY + 5);
+      }
+
+      for (const node of nodes) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#00ffff';
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
+        ctx.fillStyle = '#000';
+        ctx.fillText(node.label, node.x - 5, node.y + 4);
+      }
+    }
+
+    function addNode() {
+      const label = `N${nodes.length + 1}`;
+      const x = Math.random() * (canvas.width - 100) + 50;
+      const y = Math.random() * (canvas.height - 100) + 50;
+      nodes.push({ label, x, y });
+      draw();
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const clickedNode = nodes.find(n => Math.hypot(n.x - x, n.y - y) < radius);
+
+      if (selectingStart && clickedNode) {
+        selectingStart = false;
+        runPrim(clickedNode);
+        return;
+      }
+
+      if (clickedNode) {
+        if (!selectedNode) {
+          selectedNode = clickedNode;
+        } else if (selectedNode !== clickedNode) {
+          const weight = parseInt(prompt('Enter weight:'), 10);
+          if (!isNaN(weight)) {
+            edges.push({ from: selectedNode, to: clickedNode, weight });
+            draw();
+          }
+          selectedNode = null;
+        }
+      }
+    });
+
+    function randomizeGraph() {
+      nodes.length = 0;
+      edges.length = 0;
+      edgeColors.clear();
+      for (let i = 0; i < 6; i++) addNode();
+      for (let i = 0; i < 7; i++) {
+        const a = nodes[Math.floor(Math.random() * nodes.length)];
+        const b = nodes[Math.floor(Math.random() * nodes.length)];
+        if (a !== b && !edges.find(e => (e.from === a && e.to === b) || (e.from === b && e.to === a))) {
+          edges.push({ from: a, to: b, weight: Math.floor(Math.random() * 50) + 1 });
+        }
+      }
+      draw();
+    }
+
+    function startPrimMode() {
+      selectingStart = true;
+      alert('Select a starting node by clicking on it.');
+    }
+
+    async function runPrim(start) {
+      const visited = new Set();
+      const availableEdges = [];
+      visited.add(start);
+      let summary = "<h3>Prim's MST Steps:</h3><ul>";
+
+      function addEdges(node) {
+        for (const edge of edges) {
+          if ((edge.from === node && !visited.has(edge.to)) ||
+              (edge.to === node && !visited.has(edge.from))) {
+            availableEdges.push(edge);
+          }
+        }
+      }
+
+      addEdges(start);
+      const mst = [];
+
+      while (visited.size < nodes.length && availableEdges.length > 0) {
+        availableEdges.sort((a, b) => a.weight - b.weight);
+        const edge = availableEdges.shift();
+        const { from, to, weight } = edge;
+
+        if (visited.has(from) && visited.has(to)) continue;
+
+        const newNode = visited.has(from) ? to : from;
+        visited.add(newNode);
+        mst.push(edge);
+        edgeColors.set(edge, 'lime');
+        draw();
+        await new Promise(r => setTimeout(r, 500));
+        summary += `<li>${from.label} - ${to.label} (Weight: ${weight})</li>`;
+        addEdges(newNode);
+      }
+
+      summary += `</ul><p><strong>Total Weight: ${mst.reduce((s, e) => s + e.weight, 0)}</strong></p>`;
+      document.getElementById('summary').innerHTML = summary;
+      draw();
+    }
+  </script>
+</body>
+</html>

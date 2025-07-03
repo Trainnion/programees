@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🏆 Job Sequencing Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #e3f2fd, #bbdefb);
+      color: #0d47a1;
+      min-height: 100vh;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .profile-picture {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      border: 4px solid #42a5f5;
+      border-radius: 50%;
+      padding: 3px;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100px;
+      height: 100px;
+      z-index: 999;
+    }
+
+    .profile-picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    header {
+      text-align: center;
+      font-size: 2.5rem;
+      color: #1565c0;
+      text-shadow: 1px 1px #bbdefb;
+      margin-bottom: 2rem;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: auto;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 2rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      border: 1px solid #90caf9;
+    }
+
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      justify-content: center;
+    }
+
+    .input-group input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #64b5f6;
+      border-radius: 6px;
+      width: 150px;
+      background: #e3f2fd;
+      color: #0d47a1;
+    }
+
+    button {
+      background-color: #42a5f5;
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #1e88e5;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      background: #ffffff;
+      border: 1px solid #90caf9;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #e3f2fd;
+    }
+
+    th {
+      background-color: #e3f2fd;
+      color: #0d47a1;
+    }
+
+    ul {
+      margin-top: 1rem;
+      padding-left: 1.2rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    h3 {
+      margin-top: 2rem;
+      color: #0d47a1;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      .input-group {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .input-group input {
+        width: 100%;
+      }
+
+      .profile-picture {
+        width: 80px;
+        height: 80px;
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Profile Picture -->
+  <div class="profile-picture">
+    <img src="https://scontent.fceb6-1.fna.fbcdn.net/v/t39.30808-1/500684316_1111722254322229_3570693525122643456_n.jpg?stp=dst-jpg_s100x100_tt6&_nc_cat=105&ccb=1-7&_nc_sid=e99d92&_nc_ohc=7V9lAMu0zQ0Q7kNvwFnPSAO&_nc_oc=AdkR53xhjKwlXrGcp2eR9RApDGbcrb4aq3hSR4ZLJ60szFhp8khCnza9rPvGSCdZgfMtK_N0y6hRAZBcTGXEyxds&_nc_zt=24&_nc_ht=scontent.fceb6-1.fna&_nc_gid=TxrEvXcPEfNSpKTdNExc3g&oh=00_AfM2O5OdpvYAzQ7vnhPJ4Lx5iII2xrRy2hwVVda7kDe_6g&oe=685AA0BB" alt="Profile" />
+  </div>
+
+  <header>🏟️ Job Sequencing Arena</header>
+  <main>
+    <div class="input-group">
+      <input type="text" id="job-id" placeholder="Job ID (e.g. J1)">
+      <input type="number" id="job-deadline" placeholder="Deadline" min="1">
+      <input type="number" id="job-profit" placeholder="Profit" min="0">
+      <button onclick="addJob()">Add Job</button>
+      <button onclick="generateRandomJobs()">Randomize</button>
+    </div>
+    <div style="text-align:center;">
+      <button onclick="solveJobSequencing()">🏁 Solve</button>
+    </div>
+
+    <table id="job-table">
+      <thead>
+        <tr>
+          <th>🏷️ Job ID</th>
+          <th>📅 Deadline</th>
+          <th>💰 Profit</th>
+        </tr>
+      </thead>
+      <tbody id="job-body"></tbody>
+    </table>
+
+    <div id="solution-process"></div>
+
+    <table id="result-table">
+      <thead>
+        <tr>
+          <th>⏱️ Time Slot</th>
+          <th>🏷️ Job ID</th>
+          <th>📅 Deadline</th>
+          <th>💰 Profit</th>
+        </tr>
+      </thead>
+      <tbody id="result-body"></tbody>
+    </table>
+  </main>
+
+  <script>
+    let jobs = [];
+
+    function addJob() {
+      const id = document.getElementById('job-id').value.trim();
+      const deadline = parseInt(document.getElementById('job-deadline').value);
+      const profit = parseInt(document.getElementById('job-profit').value);
+
+      if (!id || isNaN(deadline) || isNaN(profit) || deadline <= 0 || profit < 0) {
+        alert('Please enter valid job data.');
+        return;
+      }
+
+      jobs.push({ id, deadline, profit });
+      document.getElementById('job-id').value = '';
+      document.getElementById('job-deadline').value = '';
+      document.getElementById('job-profit').value = '';
+      updateTable();
+    }
+
+    function updateTable() {
+      const tbody = document.getElementById('job-body');
+      tbody.innerHTML = '';
+      jobs.forEach(job => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${job.id}</td><td>${job.deadline}</td><td>${job.profit}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function solveJobSequencing() {
+      const n = jobs.length;
+      if (n === 0) return;
+
+      const sortedJobs = [...jobs].sort((a, b) => b.profit - a.profit);
+      const maxDeadline = Math.max(...jobs.map(j => j.deadline));
+      const result = Array(maxDeadline).fill(null);
+      let totalProfit = 0;
+
+      let processLog = '<h3>⚙️ Selection Process</h3><ul>';
+
+      for (const job of sortedJobs) {
+        for (let slot = job.deadline - 1; slot >= 0; slot--) {
+          if (!result[slot]) {
+            result[slot] = job;
+            totalProfit += job.profit;
+            processLog += `<li>✅ Scheduled <strong>${job.id}</strong> at slot ${slot + 1}</li>`;
+            break;
+          }
+        }
+      }
+
+      processLog += `</ul><p><strong>🏆 Total Profit: ${totalProfit}</strong></p>`;
+      document.getElementById('solution-process').innerHTML = processLog;
+
+      const tbody = document.getElementById('result-body');
+      tbody.innerHTML = '';
+      result.forEach((job, i) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${i + 1}</td><td>${job ? job.id : '-'}</td><td>${job ? job.deadline : '-'}</td><td>${job ? job.profit : '-'}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function generateRandomJobs() {
+      jobs = [];
+      const count = Math.floor(Math.random() * 5) + 5;
+      for (let i = 1; i <= count; i++) {
+        const deadline = Math.floor(Math.random() * 5) + 1;
+        const profit = Math.floor(Math.random() * 100) + 10;
+        jobs.push({ id: `J${i}`, deadline, profit });
+      }
+      updateTable();
+    }
+  </script>
+</body>
+</html>

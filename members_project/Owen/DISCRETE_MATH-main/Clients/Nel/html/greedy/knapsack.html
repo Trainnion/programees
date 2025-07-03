@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fractional Knapsack - Interactive</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9fbfd;
+      color: #333;
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      color: #1a237e;
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    th, td {
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background: #e3f2fd;
+    }
+    button, input[type="number"] {
+      font-size: 1rem;
+      padding: 0.5rem;
+      margin: 0.5rem 0.2rem;
+    }
+    .controls {
+      margin: 1rem 0;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Fractional Knapsack Problem</h1>
+
+  <div class="controls">
+    <label>Knapsack Capacity:
+      <input type="number" id="capacity" value="50" min="1">
+    </label>
+    <button onclick="addRow()">Add Item</button>
+    <button onclick="computeKnapsack()">Compute</button>
+  </div>
+
+  <table id="itemTable">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Value</th>
+        <th>Weight</th>
+        <th>Remove</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Selected Items</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Value</th>
+        <th>Weight</th>
+        <th>Fraction Taken</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3 id="totalValue"></h3>
+
+  <script>
+    let itemId = 1;
+
+    function addRow(value = '', weight = '') {
+      const tbody = document.querySelector('#itemTable tbody');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>Item ${itemId}</td>
+        <td><input type="number" min="0" step="any" value="${value}"></td>
+        <td><input type="number" min="0.1" step="any" value="${weight}"></td>
+        <td><button onclick="this.parentElement.parentElement.remove()">Remove</button></td>
+      `;
+      tbody.appendChild(row);
+      itemId++;
+    }
+
+    function computeKnapsack() {
+      const capacity = parseFloat(document.getElementById('capacity').value);
+      const rows = document.querySelectorAll('#itemTable tbody tr');
+      const items = [];
+
+      rows.forEach((row, index) => {
+        const inputs = row.querySelectorAll('input');
+        const value = parseFloat(inputs[0].value);
+        const weight = parseFloat(inputs[1].value);
+        if (!isNaN(value) && !isNaN(weight) && weight > 0) {
+          items.push({
+            index: index + 1,
+            value,
+            weight,
+            ratio: value / weight
+          });
+        }
+      });
+
+      items.sort((a, b) => b.ratio - a.ratio);
+
+      let remaining = capacity;
+      let totalValue = 0;
+      const selected = [];
+
+      for (const item of items) {
+        if (remaining <= 0) break;
+        const takeWeight = Math.min(item.weight, remaining);
+        const fraction = takeWeight / item.weight;
+        totalValue += item.value * fraction;
+        remaining -= takeWeight;
+
+        selected.push({
+          index: item.index,
+          value: item.value,
+          weight: item.weight,
+          fraction: fraction.toFixed(2)
+        });
+      }
+
+      const resTbody = document.querySelector('#resultTable tbody');
+      resTbody.innerHTML = "";
+      selected.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>Item ${item.index}</td>
+          <td>${item.value}</td>
+          <td>${item.weight}</td>
+          <td>${item.fraction}</td>
+        `;
+        resTbody.appendChild(row);
+      });
+
+      document.getElementById('totalValue').textContent = `Total value obtained: ${totalValue.toFixed(2)}`;
+    }
+
+    // Initialize with 3 rows
+    addRow(60, 10);
+    addRow(100, 20);
+    addRow(120, 30);
+  </script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>⭐ Fractional Knapsack: Star Wars Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: radial-gradient(ellipse at bottom, #0d0d0d 0%, #000000 100%);
+      color: #ffe81f;
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+      position: relative;
+    }
+
+    .profile-picture {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      border: 4px solid #ffe81f;
+      border-radius: 50%;
+      padding: 3px;
+      background: #000;
+      box-shadow: 0 0 10px #ffe81f;
+      width: 100px;
+      height: 100px;
+      z-index: 10;
+    }
+
+    .profile-picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+      color: #ffe81f;
+      text-shadow: 0 0 5px #ffe81f, 0 0 10px #000;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      background: #111;
+      color: #ffe81f;
+      border: 1px solid #ffe81f;
+      box-shadow: 0 0 8px rgba(255, 232, 31, 0.2);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      border: 1px solid #333;
+      text-align: center;
+    }
+
+    th {
+      background: #222;
+    }
+
+    input[type="number"] {
+      font-size: 1rem;
+      padding: 0.4rem;
+      border: 1px solid #ffe81f;
+      border-radius: 6px;
+      width: 80px;
+      background: #000;
+      color: #ffe81f;
+    }
+
+    button {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      background: #ffe81f;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .controls {
+      margin: 1.5rem 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+
+      input[type="number"] {
+        width: 100%;
+      }
+
+      .profile-picture {
+        width: 80px;
+        height: 80px;
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Profile Picture -->
+  <div class="profile-picture">
+    <img src="https://scontent.fceb2-1.fna.fbcdn.net/v/t39.30808-1/497561792_2193043201196226_3703741751922292503_n.jpg?stp=dst-jpg_s200x200_tt6&amp;_nc_cat=108&amp;ccb=1-7&amp;_nc_sid=e99d92&amp;_nc_ohc=BKUH6jtusa8Q7kNvwEI5AGJ&amp;_nc_oc=Admgh0Y7bzGoQHBx2yDi0H-Z01jomM6vobXLgsQcZxfIUiOVOETnHlp8QxJ-0Vt7ZF-LE65AVJWL3wAP6hckfytP&amp;_nc_zt=24&amp;_nc_ht=scontent.fceb2-1.fna&amp;_nc_gid=CQBLn2Qts3PUEmmrM8JwSg&amp;oh=00_AfN2s8Cc9tHNz9Bb112RKody4hvdyl-sCoSxbTfE7rCeQA&amp;oe=685D323B" alt="Profile" />
+  </div>
+
+  <h1>⭐ FRACTIONAL KNAPSACK: STAR WARS ARENA</h1>
+
+  <div class="controls">
+    <label>Knapsack Capacity:
+      <input type="number" id="capacity" value="50" min="1">
+    </label>
+    <button onclick="addRow()">+ Add Item</button>
+    <button onclick="computeKnapsack()">⚔️ Compute</button>
+  </div>
+
+  <table id="itemTable">
+    <thead>
+      <tr>
+        <th>🏷️ Item</th>
+        <th>💰 Value</th>
+        <th>⚖️ Weight</th>
+        <th>🗑️ Remove</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>🏆 Selected Items</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>🏷️ Item</th>
+        <th>💰 Value</th>
+        <th>⚖️ Weight</th>
+        <th>📊 Fraction Taken</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3 id="totalValue"></h3>
+
+  <script>
+    let itemId = 1;
+
+    function addRow(value = '', weight = '') {
+      const tbody = document.querySelector('#itemTable tbody');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>Item ${itemId}</td>
+        <td><input type="number" min="0" step="any" value="${value}"></td>
+        <td><input type="number" min="0.1" step="any" value="${weight}"></td>
+        <td><button onclick="this.parentElement.parentElement.remove()">🗑️</button></td>
+      `;
+      tbody.appendChild(row);
+      itemId++;
+    }
+
+    function computeKnapsack() {
+      const capacity = parseFloat(document.getElementById('capacity').value);
+      const rows = document.querySelectorAll('#itemTable tbody tr');
+      const items = [];
+
+      rows.forEach((row, index) => {
+        const inputs = row.querySelectorAll('input');
+        const value = parseFloat(inputs[0].value);
+        const weight = parseFloat(inputs[1].value);
+        if (!isNaN(value) && !isNaN(weight) && weight > 0) {
+          items.push({
+            index: index + 1,
+            value,
+            weight,
+            ratio: value / weight
+          });
+        }
+      });
+
+      items.sort((a, b) => b.ratio - a.ratio);
+
+      let remaining = capacity;
+      let totalValue = 0;
+      const selected = [];
+
+      for (const item of items) {
+        if (remaining <= 0) break;
+        const takeWeight = Math.min(item.weight, remaining);
+        const fraction = takeWeight / item.weight;
+        totalValue += item.value * fraction;
+        remaining -= takeWeight;
+
+        selected.push({
+          index: item.index,
+          value: item.value,
+          weight: item.weight,
+          fraction: fraction.toFixed(2)
+        });
+      }
+
+      const resTbody = document.querySelector('#resultTable tbody');
+      resTbody.innerHTML = "";
+      selected.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>Item ${item.index}</td>
+          <td>${item.value}</td>
+          <td>${item.weight}</td>
+          <td>${item.fraction}</td>
+        `;
+        resTbody.appendChild(row);
+      });
+
+      document.getElementById('totalValue').textContent = `🏅 Total value obtained: ${totalValue.toFixed(2)}`;
+    }
+
+    addRow(60, 10);
+    addRow(100, 20);
+    addRow(120, 30);
+  </script>
+</body>
+</html>

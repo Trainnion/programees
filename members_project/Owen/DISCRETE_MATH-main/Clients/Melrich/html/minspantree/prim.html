@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Prim's Mission</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: #e6d784;
+      padding: 2rem;
+      max-width: 950px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #d6c64b;
+      font-size: 2.8rem;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+      border: 2px dashed #d6c64b;
+      padding: 0.5rem 1rem;
+      display: inline-block;
+    }
+
+    .controls {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    button {
+      margin: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      background-color: #d6c64b;
+      color: #000;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 0 10px #d6c64b;
+    }
+
+    button:hover {
+      background-color: #b5a832;
+      transform: scale(1.05);
+    }
+
+    canvas {
+      border: 3px solid #d6c64b;
+      display: block;
+      margin: 1.5rem auto;
+      background: #1a1a1a;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(214,198,75,0.4);
+    }
+
+    .summary {
+      margin-top: 2rem;
+      background: #1a1a1a;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(214,198,75,0.2);
+      border: 1px dashed #d6c64b;
+    }
+
+    .summary h3 {
+      color: #fff;
+      margin-bottom: 1rem;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    ul {
+      padding-left: 1.2rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    strong {
+      color: #d6c64b;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Prim's Mission</h1>
+
+  <div class="controls">
+    <button onclick="addNode()">Add Node</button>
+    <button onclick="randomizeGraph()">Randomize</button>
+    <button onclick="startPrimMode()">Start Prim</button>
+  </div>
+
+  <canvas id="graphCanvas" width="900" height="600"></canvas>
+  <div class="summary" id="summary"></div>
+
+<script>
+  const canvas = document.getElementById('graphCanvas');
+  const ctx = canvas.getContext('2d');
+  const nodes = [];
+  const edges = [];
+  let selectedNode = null;
+  const radius = 20;
+  const edgeColors = new Map();
+  let selectingStart = false;
+  let draggingNode = null;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (const edge of edges) {
+      const { from, to, weight } = edge;
+      const color = edgeColors.get(edge) || '#666';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+
+      const midX = (from.x + to.x) / 2;
+      const midY = (from.y + to.y) / 2;
+      ctx.fillStyle = '#d6c64b';
+      ctx.fillRect(midX - 15, midY - 10, 30, 20);
+      ctx.fillStyle = '#000';
+      ctx.fillText(weight, midX - 5, midY + 5);
+    }
+
+    for (const node of nodes) {
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#e6d784';
+      ctx.fill();
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = '#000';
+      ctx.fillText(node.label, node.x - 5, node.y + 4);
+    }
+  }
+
+  function addNode() {
+    const label = `N${nodes.length + 1}`;
+    const x = Math.random() * (canvas.width - 100) + 50;
+    const y = Math.random() * (canvas.height - 100) + 50;
+    nodes.push({ label, x, y });
+    draw();
+  }
+
+  canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const clickedNode = nodes.find(n => Math.hypot(n.x - x, n.y - y) < radius);
+
+    if (selectingStart && clickedNode) {
+      selectingStart = false;
+      runPrim(clickedNode);
+      return;
+    }
+
+    if (clickedNode) {
+      draggingNode = clickedNode;
+      offsetX = x - clickedNode.x;
+      offsetY = y - clickedNode.y;
+
+      if (!selectedNode) {
+        selectedNode = clickedNode;
+      } else if (selectedNode !== clickedNode) {
+        const weight = parseInt(prompt('Enter edge weight:'), 10);
+        if (!isNaN(weight)) {
+          edges.push({ from: selectedNode, to: clickedNode, weight });
+          draw();
+        }
+        selectedNode = null;
+      }
+    }
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (draggingNode) {
+      const rect = canvas.getBoundingClientRect();
+      draggingNode.x = e.clientX - rect.left - offsetX;
+      draggingNode.y = e.clientY - rect.top - offsetY;
+      draw();
+    }
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    draggingNode = null;
+  });
+
+  function randomizeGraph() {
+    nodes.length = 0;
+    edges.length = 0;
+    edgeColors.clear();
+    for (let i = 0; i < 6; i++) addNode();
+    for (let i = 0; i < 7; i++) {
+      const a = nodes[Math.floor(Math.random() * nodes.length)];
+      const b = nodes[Math.floor(Math.random() * nodes.length)];
+      if (a !== b && !edges.find(e => (e.from === a && e.to === b) || (e.from === b && e.to === a))) {
+        edges.push({ from: a, to: b, weight: Math.floor(Math.random() * 50) + 1 });
+      }
+    }
+    draw();
+  }
+
+  function startPrimMode() {
+    selectingStart = true;
+    alert('Click a node to begin Prim’s Algorithm.');
+  }
+
+  async function runPrim(start) {
+    const visited = new Set();
+    const availableEdges = [];
+    visited.add(start);
+    let summary = "<h3>Prim’s MST Summary:</h3><ul>";
+
+    function addEdges(node) {
+      for (const edge of edges) {
+        if ((edge.from === node && !visited.has(edge.to)) ||
+            (edge.to === node && !visited.has(edge.from))) {
+          availableEdges.push(edge);
+        }
+      }
+    }
+
+    addEdges(start);
+    const mst = [];
+
+    while (visited.size < nodes.length && availableEdges.length > 0) {
+      availableEdges.sort((a, b) => a.weight - b.weight);
+      const edge = availableEdges.shift();
+      const { from, to, weight } = edge;
+
+      if (visited.has(from) && visited.has(to)) continue;
+
+      const newNode = visited.has(from) ? to : from;
+      visited.add(newNode);
+      mst.push(edge);
+      edgeColors.set(edge, 'lime');
+      draw();
+      await new Promise(r => setTimeout(r, 500));
+      summary += `<li>${from.label} ➡ ${to.label} (Weight: ${weight})</li>`;
+      addEdges(newNode);
+    }
+
+    summary += `</ul><p><strong>Total Weight: ${mst.reduce((s, e) => s + e.weight, 0)}</strong></p>`;
+    document.getElementById('summary').innerHTML = summary;
+    draw();
+  }
+</script>
+</body>
+</html>

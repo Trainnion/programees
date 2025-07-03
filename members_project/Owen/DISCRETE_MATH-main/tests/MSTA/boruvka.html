@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Borůvka's Algorithm Visualizer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(90deg, #0f0c29, #302b63, #24243e);
+      color: #00ffc8;
+      margin: 0; padding: 0; overflow: hidden;
+    }
+    .toolbar {
+      position: fixed; top:10px; left:50%; transform:translateX(-50%);
+      background:#1b1f3b; padding:1rem; border-radius:10px;
+      display:flex; gap:1rem; box-shadow:0 0 25px #00ffc840; z-index:10;
+    }
+    button {
+      background:transparent; border:2px solid #00ffc8; color:#00ffc8;
+      border-radius:6px; padding:0.5rem 1rem; font-weight:bold;
+      box-shadow:0 0 10px #00ffc860; cursor:pointer; transition:.3s;
+    }
+    button:hover { background:#00ffc8; color:#1b1f3b; }
+    svg { width:100vw; height:100vh; display:block; cursor:grab; }
+    .node circle {
+      fill:#0f0c29; stroke:#00ffc8; stroke-width:2px;
+    }
+    .node.selected circle {
+      stroke:#ffeb3b; stroke-width:3px; filter:drop-shadow(0 0 10px #ffeb3b);
+    }
+    .node text { fill:#00ffc8; font-weight:bold; }
+    .link { stroke:#00ffc8; stroke-width:2px; }
+    .weight { fill:#00ffc8; font-size:12px; }
+    .pulse {
+      animation:pulse 1s ease-in-out infinite;
+      stroke:#ffeb3b !important; stroke-width:3px !important;
+    }
+    @keyframes pulse {
+      0%,100% { filter:drop-shadow(0 0 5px #ffeb3b); }
+      50% { filter:drop-shadow(0 0 20px #ffeb3b); }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button onclick="promptNodeName()">➕ Add Node</button>
+    <button onclick="addConnection()" id="connectBtn" disabled>🔗 Add Connection</button>
+    <button onclick="runBoruvka()" id="runBtn" disabled>⚙️ Run Borůvka</button>
+    <button onclick="generateRandomGraph()">🎲 Generate Random</button>
+  </div>
+
+  <svg id="graph"></svg>
+
+  <script>
+    const svg = document.getElementById("graph");
+    const connectBtn = document.getElementById("connectBtn");
+    const runBtn = document.getElementById("runBtn");
+
+    let nodes = [], links = [], selectedNode = null;
+    let pending = null, nodeId = 0;
+    let dragTarget = null, offsetX = 0, offsetY = 0;
+
+    function promptNodeName() {
+      const name = prompt("Enter node name:");
+      if (!name) return;
+      nodes.push({ id: nodeId, name, x: 100 + Math.random()*(window.innerWidth-200), y: 100 + Math.random()*(window.innerHeight-200) });
+      nodeId++;
+      render();
+    }
+
+    function addConnection() {
+      if (!selectedNode) return;
+      pending = selectedNode;
+      alert("Now select the node to connect.");
+    }
+
+    function selectNode(node) {
+      selectedNode = node;
+      connectBtn.disabled = false;
+      runBtn.disabled = false;
+      if (pending && pending !== node) {
+        const w = parseFloat(prompt(`Weight (${pending.name}-${node.name}):`));
+        if (!isNaN(w)) links.push({ source: pending, target: node, weight: w });
+        pending = null;
+      }
+      render();
+    }
+
+    function runBoruvka() {
+      if (!selectedNode || !links.length) return;
+      let comps = new Map(nodes.map(n => [n.id, n.id]));
+      function find(u) { return comps.get(u) === u ? u : find(comps.get(u)); }
+      function union(u, v) { comps.set(find(u), find(v)); }
+
+      const mst = [];
+      while (true) {
+        const cheapest = new Map();
+        for (let link of links) {
+          const u = find(link.source.id), v = find(link.target.id);
+          if (u === v) continue;
+          for (let [a,b] of [[u,v],[v,u]]) {
+            const cur = cheapest.get(a);
+            if (!cur || link.weight < cur.weight) cheapest.set(a, { link, other: b });
+          }
+        }
+        if (!cheapest.size) break;
+        let anyMerged = false;
+        for (let { link } of cheapest.values()) {
+          const u = find(link.source.id), v = find(link.target.id);
+          if (u !== v) {
+            union(u,v);
+            mst.push(link);
+            anyMerged = true;
+          }
+        }
+        if (!anyMerged) break;
+      }
+
+      links = mst;
+      render();
+      document.querySelectorAll(".link").forEach(l => l.classList.add("pulse"));
+      setTimeout(() => document.querySelectorAll(".link").forEach(l => l.classList.remove("pulse")), 3000);
+    }
+
+    function generateRandomGraph() {
+      nodes = []; links = []; nodeId = 0; pending = null; selectedNode = null;
+      const n = 5 + Math.floor(Math.random()*4);
+      for (let i=0;i<n;i++) nodes.push({ id:i, name:'N'+i, x:100+Math.random()*(window.innerWidth-200), y:100+Math.random()*(window.innerHeight-200)});
+      for (let i=0;i<n;i++) for (let j=i+1;j<n;j++) {
+        if (Math.random()<0.4) links.push({ source: nodes[i], target: nodes[j], weight: Math.floor(Math.random()*20+1)});
+      }
+      render();
+    }
+
+    function render() {
+      svg.innerHTML = "";
+      for (let l of links) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+        line.setAttribute("x1",l.source.x); line.setAttribute("y1",l.source.y);
+        line.setAttribute("x2",l.target.x); line.setAttribute("y2",l.target.y);
+        line.classList.add("link"); svg.appendChild(line);
+        const midX=(l.source.x+l.target.x)/2, midY=(l.source.y+l.target.y)/2;
+        const txt = document.createElementNS("http://www.w3.org/2000/svg","text");
+        txt.setAttribute("x",midX); txt.setAttribute("y",midY);
+        txt.setAttribute("text-anchor","middle"); txt.classList.add("weight");
+        txt.textContent = l.weight; svg.appendChild(txt);
+      }
+      for (let n of nodes) {
+        const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+        g.setAttribute("transform",`translate(${n.x},${n.y})`);
+        g.classList.add("node");
+        if (n === selectedNode) g.classList.add("selected");
+
+        g.addEventListener("mousedown", (e) => {
+          dragTarget = n;
+          offsetX = e.clientX - n.x;
+          offsetY = e.clientY - n.y;
+        });
+
+        g.addEventListener("mouseup", () => {
+          dragTarget = null;
+        });
+
+        g.addEventListener("click", (e) => {
+          if (!dragTarget) selectNode(n);
+        });
+
+        const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        c.setAttribute("r",20); g.appendChild(c);
+        const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+        t.setAttribute("text-anchor","middle"); t.setAttribute("dy",5);
+        t.textContent = n.name; g.appendChild(t);
+        svg.appendChild(g);
+      }
+    }
+
+    svg.addEventListener("mousemove", (e) => {
+      if (dragTarget) {
+        dragTarget.x = e.clientX - offsetX;
+        dragTarget.y = e.clientY - offsetY;
+        render();
+      }
+    });
+
+    svg.addEventListener("mouseup", () => {
+      dragTarget = null;
+    });
+  </script>
+</body>
+</html>

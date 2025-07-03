@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Job Sequencing Problem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(to bottom, #ffeaa7, #a2d5f2);
+      color: #2e3d49;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.6rem;
+      color: #0a3d62;
+      text-shadow: 1px 1px 4px rgba(255, 255, 255, 0.4);
+      margin-bottom: 1.8rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 18px;
+      padding: 2rem;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+      border: 2px solid #ffeaa7aa;
+    }
+
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group input {
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: 1px solid #89c4e1;
+      border-radius: 8px;
+      background-color: #ffffffdd;
+    }
+
+    button {
+      background-color: #00aaff;
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ffbfa3;
+      color: #fff;
+      box-shadow: 0 0 8px #fd9644;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+      background-color: #ffffffcc;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 10px #00000010;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #b3ecff;
+      color: #004d66;
+    }
+
+    h3 {
+      color: #005f73;
+      margin-top: 1.5rem;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    #solution-process {
+      background-color: #ffffffcc;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 0 8px #aaa;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      .container {
+        padding: 1.2rem;
+      }
+
+      .input-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .input-group input, .input-group button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌞 Job Sequencing Problem</h1>
+
+    <div class="input-group">
+      <input type="text" id="job-id" placeholder="Job ID (e.g. J1)">
+      <input type="number" id="job-deadline" placeholder="Deadline" min="1">
+      <input type="number" id="job-profit" placeholder="Profit" min="0">
+      <button onclick="addJob()">Add Job</button>
+      <button onclick="generateRandomJobs()">Randomize</button>
+      <button onclick="solveJobSequencing()">Solve</button>
+    </div>
+
+    <table id="job-table">
+      <thead>
+        <tr>
+          <th>Job ID</th>
+          <th>Deadline</th>
+          <th>Profit</th>
+        </tr>
+      </thead>
+      <tbody id="job-body"></tbody>
+    </table>
+
+    <div id="solution-process"></div>
+
+    <table id="result-table">
+      <thead>
+        <tr>
+          <th>Time Slot</th>
+          <th>Job ID</th>
+          <th>Deadline</th>
+          <th>Profit</th>
+        </tr>
+      </thead>
+      <tbody id="result-body"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let jobs = [];
+
+    function addJob() {
+      const id = document.getElementById('job-id').value.trim();
+      const deadline = parseInt(document.getElementById('job-deadline').value);
+      const profit = parseInt(document.getElementById('job-profit').value);
+
+      if (!id || isNaN(deadline) || isNaN(profit) || deadline <= 0 || profit < 0) {
+        alert('Please enter valid job data.');
+        return;
+      }
+
+      jobs.push({ id, deadline, profit });
+      document.getElementById('job-id').value = '';
+      document.getElementById('job-deadline').value = '';
+      document.getElementById('job-profit').value = '';
+      updateTable();
+    }
+
+    function updateTable() {
+      const tbody = document.getElementById('job-body');
+      tbody.innerHTML = '';
+      jobs.forEach(job => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${job.id}</td><td>${job.deadline}</td><td>${job.profit}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function solveJobSequencing() {
+      if (jobs.length === 0) return;
+
+      const sortedJobs = [...jobs].sort((a, b) => b.profit - a.profit);
+      const maxDeadline = Math.max(...jobs.map(j => j.deadline));
+      const result = Array(maxDeadline).fill(null);
+      let totalProfit = 0;
+
+      let processLog = '<h3>🌴 Selection Process</h3><ul>';
+
+      for (const job of sortedJobs) {
+        for (let slot = job.deadline - 1; slot >= 0; slot--) {
+          if (!result[slot]) {
+            result[slot] = job;
+            totalProfit += job.profit;
+            processLog += `<li><strong>${job.id}</strong> scheduled at slot ${slot + 1}</li>`;
+            break;
+          }
+        }
+      }
+      processLog += `</ul><p><strong>Total Profit: ${totalProfit}</strong></p>`;
+      document.getElementById('solution-process').innerHTML = processLog;
+
+      const tbody = document.getElementById('result-body');
+      tbody.innerHTML = '';
+      result.forEach((job, i) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${i + 1}</td><td>${job ? job.id : '-'}</td><td>${job ? job.deadline : '-'}</td><td>${job ? job.profit : '-'}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function generateRandomJobs() {
+      jobs = [];
+      const count = Math.floor(Math.random() * 5) + 5;
+      for (let i = 1; i <= count; i++) {
+        const deadline = Math.floor(Math.random() * 5) + 1;
+        const profit = Math.floor(Math.random() * 100) + 10;
+        jobs.push({ id: `J${i}`, deadline, profit });
+      }
+      updateTable();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🌸 Activity Selection Problem</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: linear-gradient(to right, #fff0f5, #ffe4e1);
+      color: #4b2e2e;
+      min-height: 100vh;
+      padding: 40px;
+      position: relative;
+    }
+
+    .profile-picture {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      border: 4px solid #f8bbd0;
+      border-radius: 50%;
+      padding: 3px;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100px;
+      height: 100px;
+      z-index: 10;
+    }
+
+    .profile-picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    header {
+      text-align: center;
+      font-size: 2rem;
+      color: #b03a2e;
+      margin-bottom: 2rem;
+      text-shadow: 1px 1px #fce4ec;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      background: #ffffffcc;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .input-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #e8b4c4;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #f8bbd0;
+      color: #7e2d40;
+      border: none;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #f48fb1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      background: #fffafc;
+      border: 1px solid #f3cdd5;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #f9cbd2;
+    }
+
+    th {
+      background-color: #fce4ec;
+      color: #7e2d40;
+    }
+
+    .chart-container {
+      overflow-x: auto;
+      margin-top: 2rem;
+    }
+
+    .bar {
+      position: absolute;
+      height: 30px;
+      border: 1px solid #ec407a;
+      background-color: rgba(244, 143, 177, 0.6);
+      color: #4b2e2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      width: 1000px;
+      height: auto;
+      margin-top: 1rem;
+    }
+
+    .chart-row {
+      position: relative;
+      height: 40px;
+      border-bottom: 1px dashed #d8a1a1;
+    }
+
+    .timeline {
+      position: relative;
+      width: 1000px;
+      overflow-x: scroll;
+      border-left: 2px solid #c9a7b3;
+    }
+
+    .timeline-scale {
+      display: flex;
+      position: relative;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+    }
+
+    .timeline-scale div {
+      width: 40px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px;
+      }
+      main {
+        padding: 1rem;
+      }
+      .profile-picture {
+        width: 80px;
+        height: 80px;
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Profile Picture -->
+  <div class="profile-picture">
+    <img src="https://scontent.fceb6-3.fna.fbcdn.net/v/t39.30808-1/503771307_2130344287447423_5398269021153993843_n.jpg?stp=cp6_dst-jpg_s200x200_tt6&_nc_cat=101&ccb=1-7&_nc_sid=1d2534&_nc_ohc=rwEjTT1L5wgQ7kNvwF-xKrr&_nc_oc=AdkKHO8vdztbSnKt1r08UV9KFhcjwJt3OFTQ5eH6nVTIPqMhNG1p-d3aKl9J4fYSRnr51mN2dAeh_apQbNCC1SaB&_nc_zt=24&_nc_ht=scontent.fceb6-3.fna&_nc_gid=0GHYLEKlBBM2iGBuCwf5JQ&oh=00_AfM-MlNnsQheRp53reUkIndmQGJWLVnIlJBWgA60NHI9fQ&oe=6859B609" alt="Profile" />
+  </div>
+
+  <header>🌸 Activity Selection Problem</header>
+  <main>
+    <div class="input-group">
+      <input type="number" id="start-time" placeholder="Start Time" min="0">
+      <input type="number" id="end-time" placeholder="End Time" min="1">
+      <button onclick="addActivity()">Add Activity</button>
+      <button onclick="generateRandomActivities()">Randomize</button>
+    </div>
+    <button onclick="solveActivitySelection()">Solve</button>
+
+    <table id="activity-table">
+      <thead>
+        <tr>
+          <th>Activity</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Selected</th>
+        </tr>
+      </thead>
+      <tbody id="activity-body"></tbody>
+    </table>
+
+    <div class="timeline">
+      <div class="chart-wrapper" id="chart"></div>
+      <div class="timeline-scale" id="scale"></div>
+    </div>
+  </main>
+
+  <script>
+    let activities = [];
+    let selectedActivities = [];
+
+    function addActivity() {
+      const start = parseInt(document.getElementById('start-time').value);
+      const end = parseInt(document.getElementById('end-time').value);
+      if (isNaN(start) || isNaN(end) || start >= end) {
+        alert('Please enter valid start and end times (start < end).');
+        return;
+      }
+      activities.push({ start, end });
+      document.getElementById('start-time').value = '';
+      document.getElementById('end-time').value = '';
+      selectedActivities = [];
+      updateTable();
+      drawChart();
+    }
+
+    function updateTable() {
+      const tbody = document.getElementById('activity-body');
+      tbody.innerHTML = '';
+      const selectedSet = new Set(selectedActivities.map(a => `${a.start}-${a.end}`));
+      activities.forEach(({ start, end }, index) => {
+        const row = document.createElement('tr');
+        const selected = selectedSet.has(`${start}-${end}`) ? '✅' : '❌';
+        row.innerHTML = `<td>A${index + 1}</td><td>${start}</td><td>${end}</td><td>${selected}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function solveActivitySelection() {
+      if (activities.length === 0) return;
+      const sorted = [...activities].sort((a, b) => a.end - b.end);
+      selectedActivities = [sorted[0]];
+      let lastEnd = sorted[0].end;
+
+      for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i].start >= lastEnd) {
+          selectedActivities.push(sorted[i]);
+          lastEnd = sorted[i].end;
+        }
+      }
+
+      updateTable();
+      drawChart();
+    }
+
+    function generateRandomActivities() {
+      activities = [];
+      const n = Math.floor(Math.random() * 5) + 5;
+      for (let i = 0; i < n; i++) {
+        let start = Math.floor(Math.random() * 20);
+        let end = start + Math.floor(Math.random() * 10) + 1;
+        activities.push({ start, end });
+      }
+      selectedActivities = [];
+      updateTable();
+      drawChart();
+    }
+
+    function drawChart() {
+      const container = document.getElementById('chart');
+      container.innerHTML = '';
+
+      const selectedSet = new Set(selectedActivities.map(a => `${a.start}-${a.end}`));
+
+      activities.forEach((a, i) => {
+        const row = document.createElement('div');
+        row.className = 'chart-row';
+
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.left = (a.start * 40) + 'px';
+        bar.style.width = ((a.end - a.start) * 40) + 'px';
+        bar.style.top = '5px';
+        bar.style.backgroundColor = selectedSet.has(`${a.start}-${a.end}`) ? 'rgba(244,143,177,0.6)' : 'rgba(255,210,215,0.4)';
+        bar.textContent = `A${i + 1}`;
+
+        row.appendChild(bar);
+        container.appendChild(row);
+      });
+
+      const maxTime = Math.max(...activities.map(a => a.end), 10);
+      const scale = document.getElementById('scale');
+      scale.innerHTML = '';
+      for (let i = 0; i <= maxTime; i++) {
+        const tick = document.createElement('div');
+        tick.textContent = i;
+        scale.appendChild(tick);
+      }
+    }
+  </script>
+</body>
+</html>

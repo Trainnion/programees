@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kruskal's Algorithm Visualizer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+      color: #00ffc8;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1b1f3b;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 25px #00ffc840;
+      display: flex;
+      gap: 1rem;
+      z-index: 10;
+    }
+
+    button {
+      background-color: transparent;
+      border: 2px solid #00ffc8;
+      color: #00ffc8;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      box-shadow: 0 0 10px #00ffc860;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00ffc8;
+      color: #1b1f3b;
+    }
+
+    svg {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+
+    .node circle {
+      fill: #0f0c29;
+      stroke: #00ffc8;
+      stroke-width: 2px;
+    }
+
+    .node.selected circle {
+      stroke: #ffeb3b;
+      stroke-width: 3px;
+      filter: drop-shadow(0 0 10px #ffeb3b);
+    }
+
+    .node text {
+      fill: #00ffc8;
+      font-weight: bold;
+    }
+
+    .link {
+      stroke: #00ffc8;
+      stroke-width: 2px;
+    }
+
+    .weight {
+      fill: #00ffc8;
+      font-size: 12px;
+    }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1b1f3b;
+      border: 2px solid #00ffc8;
+      border-radius: 10px;
+      padding: 2rem;
+      color: #00ffc8;
+      z-index: 100;
+      box-shadow: 0 0 25px #00ffc8;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .popup input {
+      padding: 0.5rem;
+      background: transparent;
+      border: 2px solid #00ffc8;
+      color: #00ffc8;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .popup button {
+      align-self: center;
+    }
+
+    .pulse {
+      animation: pulse 1s ease-in-out infinite;
+      stroke: #ffeb3b !important;
+      stroke-width: 3px !important;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        filter: drop-shadow(0 0 5px #ffeb3b);
+      }
+      50% {
+        filter: drop-shadow(0 0 20px #ffeb3b);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button onclick="promptNodeName()">➕ Add Node</button>
+    <button onclick="addConnection()" id="connectBtn" disabled>🔗 Add Connection</button>
+    <button onclick="runKruskal()">⚙️ Run Kruskal</button>
+    <button onclick="generateRandomGraph()">🎲 Generate Random</button>
+  </div>
+  <svg id="graph"></svg>
+
+  <div id="popup" class="popup" style="display: none;">
+    <label id="popup-label"></label>
+    <input id="popup-input" type="text">
+    <button onclick="submitPopup()">OK</button>
+  </div>
+
+  <script>
+    const svg = document.getElementById("graph");
+    const connectBtn = document.getElementById("connectBtn");
+    const popup = document.getElementById("popup");
+    const popupInput = document.getElementById("popup-input");
+    const popupLabel = document.getElementById("popup-label");
+
+    let nodes = [];
+    let links = [];
+    let selectedNode = null;
+    let pendingConnection = null;
+    let nodeId = 0;
+    let popupCallback = null;
+
+    function showPopup(message, callback) {
+      popupLabel.textContent = message;
+      popupInput.value = "";
+      popup.style.display = "flex";
+      popupInput.focus();
+      popupCallback = callback;
+    }
+
+    function submitPopup() {
+      if (popupCallback) popupCallback(popupInput.value);
+      popup.style.display = "none";
+    }
+
+    function promptNodeName() {
+      showPopup("Enter node name:", name => {
+        if (!name) return;
+        const x = Math.random() * window.innerWidth * 0.8 + 50;
+        const y = Math.random() * window.innerHeight * 0.6 + 50;
+        const node = { id: nodeId++, name, x, y };
+        nodes.push(node);
+        render();
+      });
+    }
+
+    function addConnection() {
+      if (!selectedNode) return;
+      pendingConnection = selectedNode;
+      alert("Now select the node to connect to.");
+    }
+
+    function createEdge(source, target) {
+      showPopup(`Enter weight between ${source.name} and ${target.name}:`, value => {
+        const weight = +value;
+        if (isNaN(weight)) return;
+        links.push({ source, target, weight });
+        pendingConnection = null;
+        render();
+      });
+    }
+
+    function selectNode(node) {
+      selectedNode = node;
+      connectBtn.disabled = false;
+      if (pendingConnection && pendingConnection !== node) {
+        createEdge(pendingConnection, node);
+      }
+      render();
+    }
+
+    function runKruskal() {
+      const parent = {};
+      const find = u => parent[u] === u ? u : (parent[u] = find(parent[u]));
+      const union = (u, v) => parent[find(u)] = find(v);
+
+      for (let node of nodes) parent[node.id] = node.id;
+      const sorted = [...links].sort((a, b) => a.weight - b.weight);
+
+      const mst = [];
+      for (let link of sorted) {
+        const u = link.source.id, v = link.target.id;
+        if (find(u) !== find(v)) {
+          mst.push(link);
+          union(u, v);
+        }
+      }
+
+      links = mst;
+      render();
+
+      // Highlight MST links
+      const lines = document.querySelectorAll(".link");
+      lines.forEach(line => line.classList.add("pulse"));
+      setTimeout(() => lines.forEach(line => line.classList.remove("pulse")), 3000);
+    }
+
+    function generateRandomGraph() {
+      nodes = [];
+      links = [];
+      nodeId = 0;
+      const n = 5 + Math.floor(Math.random() * 4); // 5-8 nodes
+      for (let i = 0; i < n; i++) {
+        nodes.push({ id: nodeId, name: `N${nodeId}`, x: Math.random() * window.innerWidth * 0.8 + 50, y: Math.random() * window.innerHeight * 0.6 + 50 });
+        nodeId++;
+      }
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          if (Math.random() < 0.4) {
+            links.push({ source: nodes[i], target: nodes[j], weight: Math.floor(Math.random() * 20 + 1) });
+          }
+        }
+      }
+      render();
+    }
+
+    function render() {
+      svg.innerHTML = "";
+      for (let link of links) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", link.source.x);
+        line.setAttribute("y1", link.source.y);
+        line.setAttribute("x2", link.target.x);
+        line.setAttribute("y2", link.target.y);
+        line.classList.add("link");
+        svg.appendChild(line);
+
+        const midX = (link.source.x + link.target.x) / 2;
+        const midY = (link.source.y + link.target.y) / 2;
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", midX);
+        text.setAttribute("y", midY);
+        text.setAttribute("text-anchor", "middle");
+        text.classList.add("weight");
+        text.textContent = link.weight;
+        svg.appendChild(text);
+      }
+
+      for (let node of nodes) {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+        g.classList.add("node");
+        if (node === selectedNode) g.classList.add("selected");
+        g.addEventListener("mousedown", e => startDrag(e, node));
+        g.addEventListener("click", () => selectNode(node));
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("r", 20);
+        g.appendChild(circle);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("dy", 5);
+        text.textContent = node.name;
+        g.appendChild(text);
+
+        svg.appendChild(g);
+      }
+    }
+
+    let draggingNode = null;
+    function startDrag(e, node) {
+      draggingNode = node;
+      svg.addEventListener("mousemove", onDrag);
+      svg.addEventListener("mouseup", endDrag);
+    }
+
+    function onDrag(e) {
+      if (!draggingNode) return;
+      draggingNode.x = e.clientX;
+      draggingNode.y = e.clientY;
+      render();
+    }
+
+    function endDrag() {
+      draggingNode = null;
+      svg.removeEventListener("mousemove", onDrag);
+      svg.removeEventListener("mouseup", endDrag);
+    }
+  </script>
+</body>
+</html>

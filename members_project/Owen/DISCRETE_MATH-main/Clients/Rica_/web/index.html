@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Algorithm Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at top left, #1a1a1a, #0a0a0a);
+      color: #e0e0e0;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 2rem 3rem;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.8rem;
+      margin-bottom: 2.5rem;
+      color: #00e5ff;
+      text-shadow: 0 0 10px #00e5ff88;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+    }
+
+    .section h2 {
+      font-size: 1.6rem;
+      color: #80deea;
+      margin-bottom: 1.2rem;
+      border-bottom: 1px solid #444;
+      padding-bottom: 0.4rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .glow-link {
+      display: block;
+      text-align: center;
+      padding: 0.8rem 1.2rem;
+      border: 2px solid #00e5ff;
+      color: #00e5ff;
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #00e5ff33;
+      transition: all 0.25s ease;
+      background: rgba(0, 229, 255, 0.05);
+    }
+
+    .glow-link:hover {
+      background: #00e5ff;
+      color: #000;
+      box-shadow: 0 0 20px #00e5ffaa;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px;
+      }
+
+      .container {
+        padding: 1.5rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .section h2 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Algorithm Hub</h1>
+
+    <div class="section">
+      <h2>Greedy Algorithms</h2>
+      <div class="grid">
+        <a href="./greedy/knapsack.html" class="glow-link">Knapsack Problem</a>
+        <a href="./greedy/egyptian.html" class="glow-link">Egyptian Fraction</a>
+        <a href="./greedy/activity.html" class="glow-link">Activity Selection</a>
+        <a href="./greedy/jobseq.html" class="glow-link">Job Sequencing</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>MST & Shortest Paths</h2>
+      <div class="grid">
+        <a href="./minspantree/kruskal.html" class="glow-link">Kruskal's Algorithm</a>
+        <a href="./minspantree/prim.html" class="glow-link">Prim's Algorithm</a>
+        <a href="./minspantree/boruvka.html" class="glow-link">Borůvka's Algorithm</a>
+        <a href="./minspantree/dijkstra.html" class="glow-link">Dijkstra's Algorithm</a>
+        <!-- <a href="minspantree/dial.html" class="glow-link">Dial's Algorithm</a> -->
+      </div>
+    </div>
+  </div>
+</body>
+</html>

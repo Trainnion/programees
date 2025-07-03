@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Job Sequencing Problem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 51, 102, 0.2);
+      width: 90%;
+      max-width: 900px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #002244;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+
+    th {
+      background-color: #cce0ff;
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 90%;
+      padding: 0.5rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #3399ff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background: #0066cc;
+    }
+
+    .output {
+      margin-top: 2rem;
+      background: #e6f0ff;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    canvas {
+      margin-top: 2rem;
+      background: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      display: block;
+      width: 100%;
+      height: 300px;
+    }
+
+    .legend {
+      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+      font-size: 0.9rem;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+
+    .selected-color {
+      background-color: #3399ff;
+    }
+
+    .nonselected-color {
+      background-color: #ff9999;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Job Sequencing Problem</h1>
+  <table id="job-table">
+    <thead>
+      <tr>
+        <th>Job ID</th>
+        <th>Deadline</th>
+        <th>Profit</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="text" value="A" /></td>
+        <td><input type="number" value="2" /></td>
+        <td><input type="number" value="100" /></td>
+      </tr>
+      <tr>
+        <td><input type="text" value="B" /></td>
+        <td><input type="number" value="1" /></td>
+        <td><input type="number" value="19" /></td>
+      </tr>
+      <tr>
+        <td><input type="text" value="C" /></td>
+        <td><input type="number" value="2" /></td>
+        <td><input type="number" value="27" /></td>
+      </tr>
+    </tbody>
+  </table>
+  <button onclick="addJob()">➕ Add Job</button>
+  <button onclick="solveJobs()">✅ Solve</button>
+
+  <div class="output" id="summary"></div>
+  <canvas id="timeline"></canvas>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-color selected-color"></div> Scheduled</div>
+    <div class="legend-item"><div class="legend-color nonselected-color"></div> Not Scheduled</div>
+  </div>
+</div>
+
+<script>
+  function addJob() {
+    const table = document.getElementById("job-table").getElementsByTagName("tbody")[0];
+    const row = table.insertRow();
+    row.innerHTML = `
+      <td><input type="text" /></td>
+      <td><input type="number" /></td>
+      <td><input type="number" /></td>
+    `;
+  }
+
+  function solveJobs() {
+    const rows = document.querySelectorAll('#job-table tbody tr');
+    const jobs = [];
+
+    rows.forEach(row => {
+      const id = row.cells[0].querySelector('input').value;
+      const deadline = parseInt(row.cells[1].querySelector('input').value);
+      const profit = parseInt(row.cells[2].querySelector('input').value);
+      if (id && !isNaN(deadline) && !isNaN(profit)) {
+        jobs.push({ id, deadline, profit });
+      }
+    });
+
+    jobs.sort((a, b) => b.profit - a.profit);
+    const maxDeadline = Math.max(...jobs.map(j => j.deadline));
+    const schedule = Array(maxDeadline).fill(null);
+    const scheduledJobs = [];
+    const notScheduledJobs = [];
+
+    for (let job of jobs) {
+      for (let j = job.deadline - 1; j >= 0; j--) {
+        if (!schedule[j]) {
+          schedule[j] = job;
+          scheduledJobs.push(job);
+          break;
+        }
+      }
+      if (!scheduledJobs.includes(job)) {
+        notScheduledJobs.push(job);
+      }
+    }
+
+    const totalProfit = scheduledJobs.reduce((sum, job) => sum + job.profit, 0);
+    const summary = document.getElementById('summary');
+    summary.innerHTML = `
+      <h3>Summary</h3>
+      <p><strong>Total Profit:</strong> ${totalProfit}</p>
+      <table>
+        <tr><th>Time Slot</th><th>Job ID</th></tr>
+        ${schedule.map((job, i) => `<tr><td>${i + 1}</td><td>${job ? job.id : '-'}</td></tr>`).join('')}
+      </table>
+      <p><strong>Scheduled Jobs:</strong> ${scheduledJobs.map(j => j.id).join(', ')}</p>
+      <p><strong>Not Scheduled Jobs:</strong> ${notScheduledJobs.map(j => j.id).join(', ')}</p>
+    `;
+
+    drawTimeline(schedule, notScheduledJobs);
+  }
+
+  function drawTimeline(schedule, notScheduledJobs) {
+    const canvas = document.getElementById('timeline');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const blockWidth = 80;
+    const height = 50;
+    const padding = 20;
+
+    schedule.forEach((job, i) => {
+      const x = padding + i * (blockWidth + 10);
+      ctx.fillStyle = job ? '#3399ff' : '#ffffff';
+      ctx.strokeStyle = '#000';
+      ctx.strokeRect(x, padding, blockWidth, height);
+      if (job) {
+        ctx.fillRect(x, padding, blockWidth, height);
+        ctx.fillStyle = '#fff';
+        ctx.fillText(job.id, x + 30, padding + 30);
+      }
+    });
+
+    notScheduledJobs.forEach((job, idx) => {
+      const x = padding + idx * (blockWidth + 10);
+      const y = padding + height + 20;
+      ctx.fillStyle = '#ff9999';
+      ctx.fillRect(x, y, blockWidth, height);
+      ctx.strokeStyle = '#000';
+      ctx.strokeRect(x, y, blockWidth, height);
+      ctx.fillStyle = '#000';
+      ctx.fillText(job.id, x + 30, y + 30);
+    });
+  }
+</script>
+</body>
+</html>

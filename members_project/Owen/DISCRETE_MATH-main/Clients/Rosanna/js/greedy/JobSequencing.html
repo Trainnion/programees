@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Job Sequencing Problem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 51, 102, 0.2);
+      width: 90%;
+      max-width: 900px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+      background: #e6f0ff;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+
+    th {
+      background-color: #cce0ff;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      background: #3399ff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #0066cc;
+    }
+
+    .output {
+      background: #f9f9f9;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    canvas {
+      margin-top: 1rem;
+      background: #fff;
+      border: 1px solid #ccc;
+      width: 100%;
+      height: 300px;
+    }
+
+    .back-button {
+      display: block;
+      margin-top: 1.5rem;
+      text-align: center;
+      background: #ccc;
+      color: #003366;
+      padding: 0.75rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Job Sequencing Problem</h1>
+    <table id="job-table">
+      <thead>
+        <tr>
+          <th>Job</th>
+          <th>Deadline</th>
+          <th>Profit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><input type="number" value="2"></td>
+          <td><input type="number" value="100"></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input type="number" value="1"></td>
+          <td><input type="number" value="19"></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input type="number" value="2"></td>
+          <td><input type="number" value="27"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button onclick="addRow()">➕ Add Job</button>
+    <button onclick="solveJobSequencing()">✅ Solve</button>
+
+    <div class="output" id="output"></div>
+    <canvas id="jobGraph"></canvas>
+    <a href="../index.html" class="back-button">⬅ Back to Index</a>
+  </div>
+
+  <script>
+    function addRow() {
+      const table = document.getElementById('job-table').getElementsByTagName('tbody')[0];
+      const rowCount = table.rows.length;
+      const row = table.insertRow();
+      row.innerHTML = `
+        <td>${rowCount + 1}</td>
+        <td><input type="number"></td>
+        <td><input type="number"></td>
+      `;
+    }
+
+    function solveJobSequencing() {
+      const rows = document.querySelectorAll('#job-table tbody tr');
+      const jobs = [];
+
+      rows.forEach((row, index) => {
+        const deadline = parseInt(row.cells[1].querySelector('input').value);
+        const profit = parseInt(row.cells[2].querySelector('input').value);
+        if (!isNaN(deadline) && !isNaN(profit)) {
+          jobs.push({ id: index + 1, deadline, profit });
+        }
+      });
+
+      jobs.sort((a, b) => b.profit - a.profit);
+      const maxDeadline = Math.max(...jobs.map(j => j.deadline));
+      const result = new Array(maxDeadline).fill(null);
+      let totalProfit = 0;
+      let scheduleTable = '<table><thead><tr><th>Slot</th><th>Job</th></tr></thead><tbody>';
+
+      for (const job of jobs) {
+        for (let i = job.deadline - 1; i >= 0; i--) {
+          if (result[i] === null) {
+            result[i] = job;
+            totalProfit += job.profit;
+            break;
+          }
+        }
+      }
+
+      result.forEach((job, i) => {
+        scheduleTable += `<tr><td>${i + 1}</td><td>${job ? 'J' + job.id : '-'}</td></tr>`;
+      });
+      scheduleTable += '</tbody></table>';
+
+      document.getElementById('output').innerHTML =
+        `<strong>Selected Jobs:</strong> ${result.filter(j => j).map(j => 'J' + j.id).join(', ')}<br>
+         <strong>Total Profit:</strong> ${totalProfit}<br><br>
+         ${scheduleTable}`;
+
+      drawGraph(jobs, result);
+    }
+
+    function drawGraph(jobs, result) {
+      const canvas = document.getElementById('jobGraph');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const width = canvas.width;
+      const height = canvas.height;
+      const slotWidth = width / result.length;
+
+      result.forEach((job, i) => {
+        ctx.fillStyle = job ? '#3399ff' : '#ffcccc';
+        ctx.fillRect(i * slotWidth, 50, slotWidth - 4, 100);
+
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Slot ${i + 1}`, i * slotWidth + slotWidth / 2, 45);
+        if (job) {
+          ctx.fillText(`J${job.id}`, i * slotWidth + slotWidth / 2, 110);
+          ctx.fillText(`P${job.profit}`, i * slotWidth + slotWidth / 2, 130);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

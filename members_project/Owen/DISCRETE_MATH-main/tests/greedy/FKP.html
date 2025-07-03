@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fractional Knapsack - Gamer Style</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(to bottom right, #0f0c29, #302b63, #24243e);
+      color: #00ffc8;
+      padding: 2rem;
+      max-width: 1000px;
+      margin: auto;
+      position: relative;
+    }
+
+    h1, h2 {
+      text-align: center;
+      text-shadow: 0 0 10px #00ffc8;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 1.1rem;
+      display: block;
+      text-align: center;
+      margin: 1rem auto;
+      color: #00ffc8;
+    }
+
+    input[type="number"], input[type="text"] {
+      padding: 0.5rem;
+      background: #1b1f3b;
+      border: 2px solid #00ffc8;
+      border-radius: 5px;
+      color: #00ffc8;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 1.5rem;
+      background: #1a1a2e;
+      color: #00ffc8;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 15px #00ffc880;
+    }
+
+    th, td {
+      border: 1px solid #00ffc840;
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    th {
+      background-color: #12122a;
+      font-weight: bold;
+    }
+
+    button {
+      background-color: #1b1f3b;
+      color: #00ffc8;
+      border: 2px solid #00ffc8;
+      border-radius: 8px;
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
+      margin: 2rem auto 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      box-shadow: 0 0 10px #00ffc880, 0 0 20px #00ffc820 inset;
+      text-transform: uppercase;
+    }
+
+    button:hover {
+      background-color: #00ffc8;
+      color: #1b1f3b;
+      box-shadow: 0 0 20px #00ffc8, 0 0 30px #00ffc8 inset;
+      transform: scale(1.05);
+    }
+
+    p {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-top: 1rem;
+      color: #00ffc8;
+    }
+
+    #total-value {
+      font-weight: bold;
+      font-size: 1.4rem;
+      color: #2fff4c;
+      text-shadow: 0 0 5px #2fff4c;
+    }
+
+    .profile-img {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #00ffc8;
+      box-shadow: 0 0 15px #00ffc8;
+    }
+
+    @media (max-width: 600px) {
+      .profile-img {
+        width: 60px;
+        height: 60px;
+        top: 15px;
+        right: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <img src="../assets/owen.jpeg" alt="Profile Image" class="profile-img">
+
+  <h1>Fractional Knapsack</h1>
+  <label>
+    Knapsack Capacity:
+    <input type="number" id="capacity" value="50" placeholder="e.g. 50">
+  </label>
+
+  <h2>Input Items</h2>
+  <table id="input-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Value</th>
+        <th>Weight</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="text" value="Item 1" placeholder="Name"></td>
+        <td><input type="number" value="60" placeholder="Value"></td>
+        <td><input type="number" value="10" placeholder="Weight"></td>
+      </tr>
+      <tr>
+        <td><input type="text" value="Item 2" placeholder="Name"></td>
+        <td><input type="number" value="100" placeholder="Value"></td>
+        <td><input type="number" value="20" placeholder="Weight"></td>
+      </tr>
+      <tr>
+        <td><input type="text" value="Item 3" placeholder="Name"></td>
+        <td><input type="number" value="120" placeholder="Value"></td>
+        <td><input type="number" value="30" placeholder="Weight"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button onclick="solveKnapsack()">Run Algorithm</button>
+
+  <h2>Output</h2>
+  <table id="output-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Value</th>
+        <th>Weight</th>
+        <th>Value/Weight</th>
+        <th>Weight Taken</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <p><strong>Total Value:</strong> <span id="total-value">0</span></p>
+
+  <script>
+    function solveKnapsack() {
+      const capacity = parseFloat(document.getElementById("capacity").value);
+      const rows = document.querySelectorAll("#input-table tbody tr");
+      let items = [];
+
+      rows.forEach(row => {
+        const name = row.cells[0].querySelector("input").value;
+        const value = parseFloat(row.cells[1].querySelector("input").value);
+        const weight = parseFloat(row.cells[2].querySelector("input").value);
+        if (!isNaN(value) && !isNaN(weight) && weight > 0) {
+          items.push({ name, value, weight, ratio: value / weight });
+        }
+      });
+
+      items.sort((a, b) => b.ratio - a.ratio);
+
+      let remaining = capacity;
+      let totalValue = 0;
+      const outputBody = document.querySelector("#output-table tbody");
+      outputBody.innerHTML = "";
+
+      for (const item of items) {
+        let takenWeight = 0;
+        if (remaining >= item.weight) {
+          takenWeight = item.weight;
+        } else {
+          takenWeight = remaining;
+        }
+        const takenValue = (item.ratio * takenWeight);
+        totalValue += takenValue;
+        remaining -= takenWeight;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${item.name}</td>
+          <td>${item.value}</td>
+          <td>${item.weight}</td>
+          <td>${item.ratio.toFixed(2)}</td>
+          <td>${takenWeight}</td>
+        `;
+        outputBody.appendChild(row);
+
+        if (remaining <= 0) break;
+      }
+
+      document.getElementById("total-value").textContent = totalValue.toFixed(2);
+    }
+  </script>
+</body>
+</html>

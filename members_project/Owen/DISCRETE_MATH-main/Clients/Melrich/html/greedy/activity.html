@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>✨ Activity Scheduler</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background: #000;
+      color: #e6d784;
+      padding: 40px;
+      min-height: 100vh;
+      background-image: url('https://www.transparenttextures.com/patterns/black-linen.png');
+    }
+
+    header {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      color: #d6c64b;
+      border: 2px dashed #d6c64b;
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      background: #111;
+      border: 2px dashed #d6c64b;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(214, 198, 75, 0.2);
+    }
+
+    .input-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .input-group input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 150px;
+      border: 2px solid #d6c64b;
+      border-radius: 5px;
+      background: #000;
+      color: #fdf6c9;
+    }
+
+    button {
+      background-color: #d6c64b;
+      color: black;
+      border: none;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background-color: #f5e96e;
+      transform: scale(1.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      background: #1a1a1a;
+      border: 2px solid #d6c64b;
+      border-radius: 6px;
+      color: #e6d784;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #333;
+    }
+
+    th {
+      background-color: #2b2b2b;
+      color: #fdf6c9;
+      border-bottom: 2px dashed #d6c64b;
+    }
+
+    .bar {
+      position: absolute;
+      height: 30px;
+      background-color: rgba(214, 198, 75, 0.4);
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      border: 1px solid #d6c64b;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      width: 1000px;
+      margin-top: 1rem;
+    }
+
+    .chart-row {
+      position: relative;
+      height: 40px;
+      border-bottom: 1px dashed #d6c64b;
+    }
+
+    .timeline {
+      position: relative;
+      width: 1000px;
+      overflow-x: scroll;
+      border-left: 2px solid #d6c64b;
+    }
+
+    .timeline-scale {
+      display: flex;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      color: #fdf6c9;
+    }
+
+    .timeline-scale div {
+      width: 40px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px;
+      }
+      main {
+        padding: 1rem;
+      }
+      .input-group {
+        flex-direction: column;
+        align-items: center;
+      }
+      .input-group input {
+        width: 100%;
+      }
+      table {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>✨ Activity Scheduler</header>
+  <main>
+    <div class="input-group">
+      <input type="number" id="start-time" placeholder="Start Time" min="0">
+      <input type="number" id="end-time" placeholder="End Time" min="1">
+      <button onclick="addActivity()">➕ Add</button>
+      <button onclick="generateRandomActivities()">🎲 Randomize</button>
+    </div>
+    <button onclick="solveActivitySelection()">🚀 Optimize</button>
+
+    <table id="activity-table">
+      <thead>
+        <tr>
+          <th>Activity</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="activity-body"></tbody>
+    </table>
+
+    <div class="timeline">
+      <div class="chart-wrapper" id="chart"></div>
+      <div class="timeline-scale" id="scale"></div>
+    </div>
+  </main>
+
+  <script>
+    let activities = [];
+    let selectedActivities = [];
+
+    function addActivity() {
+      const start = parseInt(document.getElementById('start-time').value);
+      const end = parseInt(document.getElementById('end-time').value);
+      if (isNaN(start) || isNaN(end) || start >= end) {
+        alert('⚠️ Invalid times! Start must be less than End.');
+        return;
+      }
+      activities.push({ start, end });
+      document.getElementById('start-time').value = '';
+      document.getElementById('end-time').value = '';
+      selectedActivities = [];
+      updateTable();
+      drawChart();
+    }
+
+    function updateTable() {
+      const tbody = document.getElementById('activity-body');
+      tbody.innerHTML = '';
+      const selectedSet = new Set(selectedActivities.map(a => `${a.start}-${a.end}`));
+      activities.forEach(({ start, end }, index) => {
+        const row = document.createElement('tr');
+        const status = selectedSet.has(`${start}-${end}`) ? '✅' : '❌';
+        row.innerHTML = `<td>Task ${index + 1}</td><td>${start}</td><td>${end}</td><td>${status}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function solveActivitySelection() {
+      if (activities.length === 0) return;
+      const sorted = [...activities].sort((a, b) => a.end - b.end);
+      selectedActivities = [sorted[0]];
+      let lastEnd = sorted[0].end;
+
+      for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i].start >= lastEnd) {
+          selectedActivities.push(sorted[i]);
+          lastEnd = sorted[i].end;
+        }
+      }
+
+      updateTable();
+      drawChart();
+    }
+
+    function generateRandomActivities() {
+      activities = [];
+      const n = Math.floor(Math.random() * 5) + 5;
+      for (let i = 0; i < n; i++) {
+        let start = Math.floor(Math.random() * 20);
+        let end = start + Math.floor(Math.random() * 10) + 1;
+        activities.push({ start, end });
+      }
+      selectedActivities = [];
+      updateTable();
+      drawChart();
+    }
+
+    function drawChart() {
+      const container = document.getElementById('chart');
+      container.innerHTML = '';
+
+      const selectedSet = new Set(selectedActivities.map(a => `${a.start}-${a.end}`));
+
+      activities.forEach((a, i) => {
+        const row = document.createElement('div');
+        row.className = 'chart-row';
+
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.left = (a.start * 40) + 'px';
+        bar.style.width = ((a.end - a.start) * 40) + 'px';
+        bar.style.top = '5px';
+        bar.style.backgroundColor = selectedSet.has(`${a.start}-${a.end}`) ? 'rgba(214,198,75,0.5)' : 'rgba(214,198,75,0.2)';
+        bar.textContent = `T${i + 1}`;
+
+        row.appendChild(bar);
+        container.appendChild(row);
+      });
+
+      const maxTime = Math.max(...activities.map(a => a.end), 10);
+      const scale = document.getElementById('scale');
+      scale.innerHTML = '';
+      for (let i = 0; i <= maxTime; i++) {
+        const tick = document.createElement('div');
+        tick.textContent = i;
+        scale.appendChild(tick);
+      }
+    }
+  </script>
+</body>
+</html>

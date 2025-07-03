@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🌸 Sakura Algorithms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Verdana', sans-serif;
+      background: linear-gradient(to right, #fff0f5, #ffe4e1);
+      color: #4e342e;
+      padding: 40px 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #c2185b;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #ffffffcc;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .section {
+      margin-top: 2rem;
+    }
+    h2 {
+      color: #ad1457;
+      margin-bottom: 1rem;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      background: #fce4ec;
+      margin-bottom: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      transition: background 0.3s;
+    }
+    li:hover {
+      background: #f8bbd0;
+    }
+    a {
+      color: #880e4f;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Profile Picture */
+    .profile-picture {
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 100px;
+      height: 100px;
+      border: 4px solid #f8bbd0;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+    .profile-picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    @media (max-width: 600px) {
+      .profile-picture {
+        width: 70px;
+        height: 70px;
+        top: -20px;
+        right: -20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="profile-picture">
+      <img src="https://scontent.fceb6-3.fna.fbcdn.net/v/t39.30808-1/503771307_2130344287447423_5398269021153993843_n.jpg?stp=cp6_dst-jpg_s200x200_tt6&_nc_cat=101&ccb=1-7&_nc_sid=1d2534&_nc_ohc=rwEjTT1L5wgQ7kNvwF-xKrr&_nc_oc=AdkKHO8vdztbSnKt1r08UV9KFhcjwJt3OFTQ5eH6nVTIPqMhNG1p-d3aKl9J4fYSRnr51mN2dAeh_apQbNCC1SaB&_nc_zt=24&_nc_ht=scontent.fceb6-3.fna&_nc_gid=0GHYLEKlBBM2iGBuCwf5JQ&oh=00_AfM-MlNnsQheRp53reUkIndmQGJWLVnIlJBWgA60NHI9fQ&oe=6859B609" alt="Profile" />
+    </div>
+
+    <h1>🌸 Greedy Algorithm 🌸</h1>
+
+    <div class="section">
+      <h2>Greedy Algorithms</h2>
+      <ul>
+        <li><a href="./greedy/knapsack.html">Knapsack Problem</a></li>
+        <li><a href="./greedy/egyptian.html">Egyptian Fraction Problem</a></li>
+        <li><a href="./greedy/activity.html">Activity Selection Problem</a></li>
+        <li><a href="./greedy/jobseq.html">Job Sequencing Problem</a></li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>Minimum Spanning Tree & Shortest Paths</h2>
+      <ul>
+        <li><a href="./minspantree/kruskal.html">Kruskal's Algorithm</a></li>
+        <li><a href="./minspantree/prim.html">Prim's Algorithm</a></li>
+        <li><a href="./minspantree/boruvka.html">Borůvka's Algorithm</a></li>
+        <li><a href="./minspantree/dijkstra.html">Dijkstra's Algorithm</a></li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
