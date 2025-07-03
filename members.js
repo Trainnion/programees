@@ -10,7 +10,7 @@ let members = [
                 name: "Blocky Blast",
                 description: "A godot project.",
             },
-            
+
         ]
     },
     {
@@ -20,6 +20,7 @@ let members = [
         profile_picture: "./members_pictures/timosa.jpg",
         projects: [
             {
+                language: "",
                 name: "projectX",
                 description: "A groundbreaking project that changes everything.",
             }
