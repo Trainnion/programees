@@ -1,7 +1,7 @@
 /* Styles for the code container and file list in project_loader.js */
 .project-files-flex {
     display: flex;
-    height: 100%;
+    height: inherit;
     border-radius: 8px;
 }
 
@@ -32,7 +32,6 @@
     color: #e0e0e0;
     border-radius: 8px;
     height: inherit;
-    overflow-x: auto;
 }
 
 #code-container li {
