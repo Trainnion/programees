@@ -9,20 +9,20 @@ let members = [
                 language: "Python",
                 name: "Discrete Mathematics",
                 description: "A comprehensive Python project that explores fundamental concepts in discrete mathematics, including logic, set theory, combinatorics, graph theory, and algorithms. The project features interactive examples and problem-solving tools to help users understand and apply discrete math principles.",
-                Filedirectory: "../members_projects/Owen/DISCRETE_MATH-main",
+                File_directory: "../members_projects/Owen/DISCRETE_MATH-main",
             },
 
             {
                 language: "Godot",
                 name: "Blocky Blast",
                 description: "A JavaScript project.",
-                Filedirectory: "../members_projects/Owen/",
+                File_directory: "../members_projects/Owen/",
             },
               {
                 language: "Java",
                 name: "Pokemon Battle Simulator",
                 description: "A Java project.",
-                Filedirectory: "../members_projects/Owen/",
+                File_directory: "../members_projects/Owen/",
             },
 
         ]
@@ -52,6 +52,29 @@ let members = [
                 name: "projectY",
                 description: "An innovative project that pushes boundaries.",
             }
+        ]
+    },
+
+    {
+        id: "00004",
+        name: "Uzziah Ram M. Genella",
+        message: "Hello, I'm Uzziah! I'm a tech enthusiast and love to build cool stuff.",
+        profile_picture: "./members_pictures/ram.png",
+        projects: [
+            {
+                language: "JavaScript",
+                name: "Norsu E-commerce",
+                description: "A JavaScript project.",
+                File_directory: "./members_projects/Uzziah/",
+            },
+            {
+                language: "Python",
+                name: "Discrete Mathematics",
+                description: "please gana na.",
+                File_directory: "../members_projects/Uzziah/",
+            }
+
+
         ]
     }
 ]

@@ -1,0 +1,10 @@
+        <!-- <py-script src="members_project/Owen/DISCRETE_MATH-main/ST.py"></py-script>
+        <py-script src="members_project/Owen/DISCRETE_MATH-main/TOOLS.py"></py-script>
+        <py-script src="members_project/Owen/DISCRETE_MATH-main/basic_math.py"></py-script>
+        <py-script src="members_project/Owen/DISCRETE_MATH-main/Ciphers.py"></py-script>
+        <py-script src="members_project/Owen/DISCRETE_MATH-main/GCD_LCM.py"></py-script>
+        <py-script src="members_project/Owen/DISCRETE_MATH-main/Prime.py"></py-script>
+        <py-script src="members_project/Owen/DISCRETE_MATH-main/Searching.py"></py-script>
+        <py-script src="members_project/Owen/DISCRETE_MATH-main/Sorting.py"></py-script>
+        <py-script src="members_project/Owen/DISCRETE_MATH-main/test.py"></py-script>
+        <py-script src="members_project/Owen/DISCRETE_MATH-main/TT.py"></py-script> -->

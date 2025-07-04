@@ -28,7 +28,7 @@ const show_project_information = (viewed_project) => {
     project_information.appendChild(project_message);
 
     // Create a play button with play_arrow image if a Filedirectory exists
-    if (viewed_project.Filedirectory) {
+    if (viewed_project.File_directory) {
         let playButton = document.createElement("button");
         playButton.className = "play_button";
         let playIcon = document.createElement("img");
