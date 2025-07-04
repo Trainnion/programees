@@ -5,6 +5,10 @@
     border-radius: 8px;
 }
 
+.project-files-flex li {
+    font-family: monospace;
+}
+
 #file-list {
     list-style: none;
     padding: 0;
@@ -34,8 +38,3 @@
     height: inherit;
 }
 
-#code-container li {
-    margin: 0;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 14px;
-}
