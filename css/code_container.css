@@ -27,6 +27,7 @@
 
 #file-list ul {
    height: inherit;
+   width: 10rem;
 }
 #code-container {
     flex: 1;

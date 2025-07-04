@@ -15,8 +15,6 @@ const languages = [
 const show_project_information = (viewed_project) => {
     let information_about_member = document.getElementById("information_about_member");
 
-
-
     const existing_project_infomation = document.getElementById("project_information");
     if (existing_project_infomation) {
         existing_project_infomation.remove();
@@ -31,7 +29,7 @@ const show_project_information = (viewed_project) => {
     project_information.appendChild(project_message);
 
     if (viewed_project.File_directory) {
-            project_loader(viewed_project.File_directory);
+            project_loader(viewed_project.File_directory, viewed_project.name);
         };
         
     }

@@ -1,18 +1,42 @@
-const project_loader = async (folderPath) => {
+const project_loader = async (folderPath, project_name) => {
     const container = document.getElementById("information_about_member");
 
-    container.innerHTML = `
-        <h2>Code 😎</h2>
-        <div class="project-files-flex">
-            <ul id="file-list"></ul>
-            <pre id="code-container"></pre>
-        </div>
-    `;
+
+    let existing_title = document.getElementById("Project_title");
+    let existing_Project_files = document.getElementsByClassName("project-files-flex");
+
+    //check if theres already a project being shown
+    if (existing_title) {
+        existing_title.remove();
+    }
+    if (existing_Project_files.length > 0) {
+        Array.from(existing_Project_files).forEach(el => el.remove());
+    }
+
+    //creates the semi-file browser
+    const title = document.createElement("h2");
+    title.id = "Project_title";
+    title.textContent = `${project_name}`;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "project-files-flex";
+
+    const ul = document.createElement("ul");
+    ul.id = "file-list";
+
+    const pre = document.createElement("pre");
+    pre.id = "code-container";
+
+    wrapper.appendChild(ul);
+    wrapper.appendChild(pre);
+    container.appendChild(title);
+    container.appendChild(wrapper);
 
     const fileListElement = document.getElementById("file-list");
     const codeContainer = document.getElementById("code-container");
 
     try {
+
         const indexRes = await fetch(`${folderPath}/index.json`);
         if (!indexRes.ok) throw new Error(`index.json not found in ${folderPath}`);
         const files = await indexRes.json();
