@@ -1,0 +1,22 @@
+[
+    "tree_factorization.py",
+    "sorting.py",
+    "set_theory.py",
+    "searching.py",
+    "Quine_McCluskey.py",
+    "propositional_Logic.py",
+    "ones_twos_complement.py",
+    "number_theory.py",
+    "modulo_func.py",
+    "main_menu.py",
+    "logicTables.py",
+    "logical_equivalence.py",
+    "Latest_ciphers.py",
+    "K_map.py",
+    "greedy_Algorithm.py",
+    "gcd_lcm_calculator.py",
+    "euler_Totient.py",
+    "conversions.py",
+    "chinese_remainder.py",
+    "bitwise_binary.py"
+]

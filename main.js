@@ -1,4 +1,6 @@
 import members from "./Programees_members.js";
+import project_loader from "./project_loader.js";
+
 const languages = [
     "JavaScript",
     "Python",  
@@ -6,11 +8,14 @@ const languages = [
     "Java",
     "C#",
     "Godot",
+    "Unreal Engine",
 ];
 
 
 const show_project_information = (viewed_project) => {
     let information_about_member = document.getElementById("information_about_member");
+
+
 
     const existing_project_infomation = document.getElementById("project_information");
     if (existing_project_infomation) {
@@ -25,21 +30,12 @@ const show_project_information = (viewed_project) => {
     project_message.textContent = viewed_project.description || "This is a placeholder for project information.";
     project_information.appendChild(project_message);
 
-    // Create a play button with play_arrow image if a Filedirectory exists
     if (viewed_project.File_directory) {
-        let playButton = document.createElement("button");
-        playButton.className = "play_button";
-        let playIcon = document.createElement("img");
-        playIcon.src = "./assets/buttons/play_arrow.svg";
-        playIcon.alt = "Play";
-        playButton.appendChild(playIcon);
-        playButton.onclick = () => {
-            console.log("hello");
+            project_loader(viewed_project.File_directory);
         };
-        project_information.appendChild(playButton);
+        
     }
-    // You can add more details about the project here
-}
+
 
 const show_member_information = (member_ID) => {
     let content = document.getElementById("content");

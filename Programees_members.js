@@ -9,9 +9,8 @@ let members = [
                 language: "Python",
                 name: "Discrete Mathematics",
                 description: "A comprehensive Python project that explores fundamental concepts in discrete mathematics, including logic, set theory, combinatorics, graph theory, and algorithms. The project features interactive examples and problem-solving tools to help users understand and apply discrete math principles.",
-                File_directory: "../members_projects/Owen/DISCRETE_MATH-main",
+                File_directory: "./members_project/Owen/DISCRETE_MATH-main",
             },
-
             {
                 language: "Godot",
                 name: "Blocky Blast",
@@ -65,11 +64,13 @@ let members = [
                 language: "JavaScript",
                 name: "Norsu E-commerce",
                 description: "A JavaScript project.",
+                File_directory: "./members_project/Uzziah/Norsu_E-commerce",
             },
             {
                 language: "Python",
                 name: "Discrete Mathematics",
                 description: "please gana na.",
+                File_directory: "./members_project/Uzziah/Discrete_Mathematics",
             }
 
 

@@ -1,0 +1,42 @@
+/* Styles for the code container and file list in project_loader.js */
+.project-files-flex {
+    display: flex;
+    height: 100%;
+    border-radius: 8px;
+}
+
+#file-list {
+    list-style: none;
+    padding: 0;
+    width: 200px;
+    border-right: 1px solid #ccc;
+}
+#file-list li {
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: background 0.2s;
+}
+#file-list li:hover {
+    background: #23272f;
+    color: #fff;
+}
+
+#file-list ul {
+   height: inherit;
+}
+#code-container {
+    flex: 1;
+    padding: 1rem;
+    white-space: pre-wrap;
+    background: #181a1b;
+    color: #e0e0e0;
+    border-radius: 8px;
+    height: inherit;
+    overflow-x: auto;
+}
+
+#code-container li {
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+}
