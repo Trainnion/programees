@@ -65,13 +65,32 @@ let members = [
                 language: "JavaScript",
                 name: "Norsu E-commerce",
                 description: "A JavaScript project.",
-                File_directory: "./members_projects/Uzziah/",
             },
             {
                 language: "Python",
                 name: "Discrete Mathematics",
                 description: "please gana na.",
-                File_directory: "../members_projects/Uzziah/",
+            }
+
+
+        ]
+    },
+    {
+        id: "00005",
+        name: "Miguel Alfonso \"Migz\" Gutib",
+        message: "Hello, I'm Miguel! I'm a passionate developer and love to create innovative solutions.",
+        profile_picture: "./members_pictures/miguel.png",
+        projects: [
+            {
+                language: "C#",
+                name: "Budget Management System",
+                description: "A C# project.",
+                
+            },
+            {
+                language: "Python",
+                name: "Discrete Mathematics",
+                description: "please gana na.",
             }
 
 

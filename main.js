@@ -1,6 +1,4 @@
 import members from "./Programees_members.js";
-import python_runner from "./python_runner.js";
-
 const languages = [
     "JavaScript",
     "Python",  
@@ -36,7 +34,7 @@ const show_project_information = (viewed_project) => {
         playIcon.alt = "Play";
         playButton.appendChild(playIcon);
         playButton.onclick = () => {
-            python_runner();
+            console.log("hello");
         };
         project_information.appendChild(playButton);
     }
