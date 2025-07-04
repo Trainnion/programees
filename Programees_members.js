@@ -70,7 +70,7 @@ let members = [
                 language: "Python",
                 name: "Discrete Mathematics",
                 description: "please gana na.",
-                File_directory: "./members_project/Ram/Discrete_math/Plural_june24-1 - Copy",
+                File_directory: "./members_project/Ram/Discrete_math/main_folder",
             }
 
 
