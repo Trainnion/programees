@@ -61,12 +61,6 @@ let members = [
         profile_picture: "./members_pictures/ram.png",
         projects: [
             {
-                language: "JavaScript",
-                name: "Norsu E-commerce",
-                description: "A JavaScript project.",
-                File_directory: "./members_project/Uzziah/Norsu_E-commerce",
-            },
-            {
                 language: "Python",
                 name: "Discrete Mathematics",
                 description: "please gana na.",
