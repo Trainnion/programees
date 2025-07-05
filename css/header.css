@@ -9,8 +9,8 @@ body {
 
 
 .header {
-    font-family: 'Courier New';
-    background: #23272f;
+    font-family: "MuseoModerno", sans-serif;
+    background: #2A0E3F;
     color: #fff;
     padding: 1rem 0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
